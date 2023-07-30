@@ -4132,7 +4132,7 @@
         function showQuestion() {
             if (currentWordIndex >= wordsData.length) {
                 // All questions are answered, show the final score or any other message.
-                document.getElementById('word').textContent = 'Quiz Complete';
+                document.getElementById('word').innerHTML = `Quiz Completed: Your score - <span style='color:red;'>${score} / ${wordsData.length}</span> `;
                 document.getElementById('options').style.display = 'none';
                 document.getElementById('next-btn').style.display = 'none';
                 return;
@@ -4183,7 +4183,7 @@
                 if (input !== null && input !== "") {
                     const numbersArray = input.split(",");
                     let parsedNumbersArray = numbersArray.map(number => parseInt(number.trim(), 10));
-                    parsedNumbersArray = parsedNumbersArray.filter(n => n);
+                    parsedNumbersArray = parsedNumbersArray.filter(n => !isNaN(n));
                     if (parsedNumbersArray.length == 0) throw new Error('invalid input');
                     wordsData = wordsData.filter(w => parsedNumbersArray.indexOf(w.index) != -1);
                     wordsData = shuffle(wordsData);
