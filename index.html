@@ -1,0 +1,4199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Word Quiz</title>
+    <style>
+        /* Add your general CSS styling here */
+
+        .correct.option {
+            background-color: #4caf50;
+            /* Green color */
+            color: #fff;
+            /* White text */
+            border-color: #4caf50;
+            /* Green border */
+        }
+
+        /* Styling for the selected option (regardless of being correct or incorrect) when clicked */
+        .selected.option {
+            background-color: #2196f3;
+            /* Blue color */
+            color: #fff;
+            /* White text */
+            border-color: #2196f3;
+            /* Blue border */
+        }
+
+        #word {
+            font-size: 54px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #4caf50;
+            /* Green border for the question */
+            padding: 10px;
+        }
+
+        /* Styling for each option button */
+        #options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Styling for each option button */
+        .option {
+            font-size: 18px;
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            border: 2px solid #2196f3;
+            /* Blue border for options */
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        /* On hover effect for options */
+        .option:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Styling for the Next button */
+        #next-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* On hover effect for the Next button */
+        #next-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+    <div class="quiz-container">
+        <h1 id="word"></h1><button onclick="speakPronunciation()"><i class="fas fa-volume-up"></i></button>
+        <div id="options">
+            <button id="option0" class="option" onclick="checkAnswer(0)"></button><br />
+            <button id="option1" class="option" onclick="checkAnswer(1)"></button><br />
+            <button id="option2" class="option" onclick="checkAnswer(2)"></button><br />
+            <button id="option3" class="option" onclick="checkAnswer(3)"></button><br />
+        </div>
+        <button id="next-btn" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            // While there remain elements to shuffle.
+            while (currentIndex != 0) {
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+        let wordsData = [
+            {
+                "w": "abound",
+                "m": "to exist in large numbers or quantities; to be plentiful",
+                "index": 0
+            },
+            {
+                "w": "adulterate",
+                "m": "to make impure by adding inferior or tainted substances",
+                "index": 1
+            },
+            {
+                "w": "abate",
+                "m": "to become less intense or widespread; to decrease",
+                "index": 2
+            },
+            {
+                "w": "abstain",
+                "m": "to refrain from doing something, especially something pleasurable or satisfying",
+                "index": 3
+            },
+            {
+                "w": "aloof",
+                "m": "physically or emotionally distant; reserved or indifferent",
+                "index": 4
+            },
+            {
+                "w": "admonish",
+                "m": "to warn or reprimand firmly; to advise or urge against",
+                "index": 5
+            },
+            {
+                "w": "appease",
+                "m": "to pacify or satisfy by giving in to demands; to relieve or lessen",
+                "index": 6
+            },
+            {
+                "w": "accentuate",
+                "m": "to emphasize or highlight; to make more noticeable or prominent",
+                "index": 7
+            },
+            {
+                "w": "boorish",
+                "m": "rudely insensitive or ill-mannered; coarse and uncultured",
+                "index": 8
+            },
+            {
+                "w": "acumen",
+                "m": "keen insight or skill in making quick and accurate judgments",
+                "index": 9
+            },
+            {
+                "w": "amorphous",
+                "m": "without a clear shape or form; lacking definite organization",
+                "index": 0
+            },
+            {
+                "w": "advocate",
+                "m": "to publicly support or recommend a particular cause or policy",
+                "index": 1
+            },
+            {
+                "w": "abjure",
+                "m": "to renounce or reject solemnly; to abstain from",
+                "index": 2
+            },
+            {
+                "w": "approbation",
+                "m": "approval or praise, often officially given",
+                "index": 3
+            },
+            {
+                "w": "clangor",
+                "m": "a loud, resonant, and often harsh sound; a clamor",
+                "index": 4
+            },
+            {
+                "w": "aesthetic",
+                "m": "concerned with beauty or the appreciation of beauty; artistic",
+                "index": 5
+            },
+            {
+                "w": "arbitrary",
+                "m": "based on random choice or personal whim, rather than any reason or system",
+                "index": 6
+            },
+            {
+                "w": "conjectural",
+                "m": "based on guesswork or speculation; hypothetical",
+                "index": 7
+            },
+            {
+                "w": "brook",
+                "m": "to tolerate or endure; to put up with",
+                "index": 8
+            },
+            {
+                "w": "antithesis",
+                "m": "the direct opposite; a contrast or opposition between two things",
+                "index": 9
+            },
+            {
+                "w": "austere",
+                "m": "severe or strict in manner, attitude, or appearance; simple and unadorned",
+                "index": 0
+            },
+            {
+                "w": "aggrandize",
+                "m": "to increase the power, status, or wealth of something or someone",
+                "index": 1
+            },
+            {
+                "w": "anomalous",
+                "m": "deviating from what is standard, normal, or expected; irregular",
+                "index": 2
+            },
+            {
+                "w": "cherish",
+                "m": "to hold dear; to feel or show affection for",
+                "index": 3
+            },
+            {
+                "w": "conventional",
+                "m": "based on or in accordance with what is generally done or believed",
+                "index": 4
+            },
+            {
+                "w": "affectation",
+                "m": "behavior, speech, or manner that is artificial and designed to impress",
+                "index": 5
+            },
+            {
+                "w": "archaic",
+                "m": "very old or old-fashioned; no longer in general use",
+                "index": 6
+            },
+            {
+                "w": "convivial",
+                "m": "friendly, lively, and enjoyable; sociable",
+                "index": 7
+            },
+            {
+                "w": "circumspect",
+                "m": "wary and unwilling to take risks; cautious",
+                "index": 8
+            },
+            {
+                "w": "ascribe",
+                "m": "to attribute or assign a particular quality, especially as a cause or source",
+                "index": 9
+            },
+            {
+                "w": "belie",
+                "m": "to fail to give a true notion or impression of something; to contradict",
+                "index": 0
+            },
+            {
+                "w": "alacrity",
+                "m": "cheerful readiness; brisk and eager action",
+                "index": 1
+            },
+            {
+                "w": "antipathy",
+                "m": "a strong feeling of dislike or aversion towards something or someone",
+                "index": -1
+            },
+            {
+                "w": "corroborate",
+                "m": "to confirm or give support to a statement, theory, or finding",
+                "index": 3
+            },
+            {
+                "w": "debunk",
+                "m": "to expose the falseness or exaggerations of a myth, idea, or belief",
+                "index": 4
+            },
+            {
+                "w": "alleviate",
+                "m": "to make suffering, pain, or hardship less severe; to mitigate",
+                "index": 5
+            },
+            {
+                "w": "clamorous",
+                "m": "making a loud and confused noise; vehemently demanding attention",
+                "index": 6
+            },
+            {
+                "w": "decadent",
+                "m": "characterized by moral or cultural decline; self-indulgent and luxurious",
+                "index": 7
+            },
+            {
+                "w": "comity",
+                "m": "courtesy and considerate behavior toward others; mutual respect",
+                "index": 8
+            },
+            {
+                "w": "befuddled",
+                "m": "unable to think clearly; confused or perplexed",
+                "index": 9
+            },
+            {
+                "w": "capricious",
+                "m": "given to sudden and unaccountable changes of mood or behavior; unpredictable",
+                "index": 0
+            },
+            {
+                "w": "ambivalent",
+                "m": "having mixed feelings or contradictory ideas about something or someone",
+                "index": 1
+            },
+            {
+                "w": "arcane",
+                "m": "understood by only a few; mysterious or secret",
+                "index": 2
+            },
+            {
+                "w": "disparate",
+                "m": "essentially different in kind; not allowing comparison",
+                "index": 3
+            },
+            {
+                "w": "diminutive",
+                "m": "extremely or unusually small; tiny",
+                "index": 4
+            },
+            {
+                "w": "analogous",
+                "m": "comparable in certain respects; similar or equivalent",
+                "index": 5
+            },
+            {
+                "w": "dearth",
+                "m": "a scarcity or lack of something; a shortage",
+                "index": 6
+            },
+            {
+                "w": "egregious",
+                "m": "outstandingly bad; shocking or appalling",
+                "index": 7
+            },
+            {
+                "w": "commensurate",
+                "m": "corresponding in size or degree; in proportion",
+                "index": 8
+            },
+            {
+                "w": "eschew",
+                "m": "to deliberately avoid or abstain from",
+                "index": 9
+            },
+            {
+                "w": "cerebral",
+                "m": "relating to the brain or intellect; intellectual and rational",
+                "index": 0
+            },
+            {
+                "w": "ameliorate",
+                "m": "to make something better or more tolerable; to improve",
+                "index": 1
+            },
+            {
+                "w": "arduous",
+                "m": "involving or requiring strenuous effort; difficult and tiring",
+                "index": 2
+            },
+            {
+                "w": "emulate",
+                "m": "to imitate with the intent of equaling or surpassing the model",
+                "index": 3
+            },
+            {
+                "w": "discernible",
+                "m": "perceptible; able to be seen or recognized",
+                "index": 4
+            },
+            {
+                "w": "bolster",
+                "m": "to support or strengthen; to prop up",
+                "index": 5
+            },
+            {
+                "w": "explicable",
+                "m": "able to be explained or understood; understandable",
+                "index": 6
+            },
+            {
+                "w": "evanescent",
+                "m": "tending to vanish or fade like vapor; transient",
+                "index": 7
+            },
+            {
+                "w": "cordial",
+                "m": "warm and friendly; gracious",
+                "index": 8
+            },
+            {
+                "w": "esoteric",
+                "m": "intended for or understood by only a small group with specialized knowledge",
+                "index": 9
+            },
+            {
+                "w": "congenial",
+                "m": "pleasant or friendly in nature; agreeable",
+                "index": 0
+            },
+            {
+                "w": "amenable",
+                "m": "open and responsive to suggestion; easily persuaded or controlled",
+                "index": 1
+            },
+            {
+                "w": "artless",
+                "m": "without deceit or cunning; natural and simple",
+                "index": 2
+            },
+            {
+                "w": "enervate",
+                "m": "to weaken or drain of energy; to cause to feel drained of energy",
+                "index": 3
+            },
+            {
+                "w": "enigmatic",
+                "m": "difficult to interpret or understand; mysterious and puzzling",
+                "index": 4
+            },
+            {
+                "w": "chauvinistic",
+                "m": "excessively and unquestioningly patriotic; having an undue belief in one's superiority",
+                "index": 5
+            },
+            {
+                "w": "hyperbole",
+                "m": "exaggerated statements or claims not meant to be taken literally",
+                "index": 6
+            },
+            {
+                "w": "flamboyant",
+                "m": "tending to attract attention because of their exuberance, confidence, or stylishness",
+                "index": 7
+            },
+            {
+                "w": "deleterious",
+                "m": "causing harm or damage; detrimental",
+                "index": 8
+            },
+            {
+                "w": "evasive",
+                "m": "tending to avoid commitment or self-revelation; elusive",
+                "index": 9
+            },
+            {
+                "w": "conspicuous",
+                "m": "standing out so as to be clearly visible; attracting attention",
+                "index": 0
+            },
+            {
+                "w": "anachronistic",
+                "m": "belonging to a period other than that being portrayed; chronologically misplaced",
+                "index": 1
+            },
+            {
+                "w": "ascetic",
+                "m": "practicing self-discipline and abstention from indulgence; austere",
+                "index": 2
+            },
+            {
+                "w": "ephemeral",
+                "m": "lasting for a very short time; transient",
+                "index": 3
+            },
+            {
+                "w": "estranged",
+                "m": "alienated and emotionally detached; no longer close or affectionate",
+                "index": 4
+            },
+            {
+                "w": "connoisseur",
+                "m": "an expert judge in matters of taste, especially in the arts",
+                "index": 5
+            },
+            {
+                "w": "immutable",
+                "m": "unchanging over time or unable to be changed",
+                "index": 6
+            },
+            {
+                "w": "forestall",
+                "m": "to prevent or obstruct by taking action ahead of time; to anticipate",
+                "index": 7
+            },
+            {
+                "w": "dichotomy",
+                "m": "a division or contrast between two things that are or are represented as being opposed",
+                "index": 8
+            },
+            {
+                "w": "exculpate",
+                "m": "to clear from blame or guilt; to declare innocent",
+                "index": 9
+            },
+            {
+                "w": "cursory",
+                "m": "hasty and therefore not thorough or detailed",
+                "index": 0
+            },
+            {
+                "w": "audacious",
+                "m": "showing a willingness to take surprisingly bold risks; daring",
+                "index": 1
+            },
+            {
+                "w": "assuage",
+                "m": "to make an unpleasant feeling, such as pain or sorrow, less intense or severe; to pacify or relieve",
+                "index": -1
+            },
+            {
+                "w": "fervid",
+                "m": "intensely enthusiastic or passionate; fervent",
+                "index": 3
+            },
+            {
+                "w": "extravagant",
+                "m": "lacking restraint in spending money or using resources; excessive",
+                "index": 4
+            },
+            {
+                "w": "dissemble",
+                "m": "to conceal one's true motives, feelings, or beliefs, often by presenting a false appearance or pretending",
+                "index": -1
+            },
+            {
+                "w": "indefatigable",
+                "m": "showing a capacity for persistent effort; tireless",
+                "index": 6
+            },
+            {
+                "w": "gainsay",
+                "m": "to deny or contradict; to speak or act against",
+                "index": 7
+            },
+            {
+                "w": "edify",
+                "m": "to instruct or improve someone morally or intellectually",
+                "index": 8
+            },
+            {
+                "w": "expedite",
+                "m": "to make happen sooner or be accomplished more quickly; to speed up",
+                "index": 9
+            },
+            {
+                "w": "daunting",
+                "m": "seeming difficult to deal with in anticipation; intimidating",
+                "index": 0
+            },
+            {
+                "w": "avaricious",
+                "m": "having or showing extreme greed for wealth or material gain; money-grubbing",
+                "index": 1
+            },
+            {
+                "w": "betray",
+                "m": "to be disloyal to; to reveal or disclose information",
+                "index": 2
+            },
+            {
+                "w": "garrulous",
+                "m": "excessively talkative, especially on trivial matters",
+                "index": 3
+            },
+            {
+                "w": "fanciful",
+                "m": "over-imaginative and unrealistic; whimsical",
+                "index": 4
+            },
+            {
+                "w": "dogged",
+                "m": "having or showing tenacity and grim persistence; determined",
+                "index": 5
+            },
+            {
+                "w": "indolent",
+                "m": "wanting to avoid activity or exertion; lazy",
+                "index": 6
+            },
+            {
+                "w": "galvanize",
+                "m": "to shock or excite someone into taking action; to stimulate or motivate",
+                "index": 7
+            },
+            {
+                "w": "elicit",
+                "m": "to evoke or draw out a response, answer, or fact from someone",
+                "index": 8
+            },
+            {
+                "w": "fastidious",
+                "m": "very attentive to and concerned about accuracy and detail; meticulous",
+                "index": 9
+            },
+            {
+                "w": "deify",
+                "m": "to treat or worship someone or something as a god",
+                "index": 0
+            },
+            {
+                "w": "banal",
+                "m": "lacking originality or freshness; trite and overly predictable",
+                "index": 1
+            },
+            {
+                "w": "bucolic",
+                "m": "relating to or characteristic of the pleasant aspects of the countryside and rural life; rustic or pastoral",
+                "index": -1
+            },
+            {
+                "w": "incendiary",
+                "m": "tending to stir up conflict or rebellion; inflammatory",
+                "index": 3
+            },
+            {
+                "w": "frivolous",
+                "m": "not having any serious purpose or value; trivial and silly",
+                "index": 4
+            },
+            {
+                "w": "dupe",
+                "m": "to deceive or trick someone into believing something that is not true",
+                "index": 5
+            },
+            {
+                "w": "insular",
+                "m": "narrow-minded and resistant to new ideas or influences; isolated",
+                "index": 6
+            },
+            {
+                "w": "indiscriminate",
+                "m": "done at random or without careful judgment; unselective",
+                "index": 7
+            },
+            {
+                "w": "erudite",
+                "m": "having or showing great knowledge or learning; scholarly",
+                "index": 8
+            },
+            {
+                "w": "feign",
+                "m": "to pretend to be affected by a feeling, state, or injury",
+                "index": 9
+            },
+            {
+                "w": "didactic",
+                "m": "intended to teach, particularly in having moral instruction as an ulterior motive",
+                "index": 0
+            },
+            {
+                "w": "benign",
+                "m": "gentle and kind; not harmful in effect",
+                "index": 1
+            },
+            {
+                "w": "burgeon",
+                "m": "to begin to grow or increase rapidly; to flourish",
+                "index": 2
+            },
+            {
+                "w": "inimical",
+                "m": "tending to obstruct or harm; unfriendly or hostile",
+                "index": 3
+            },
+            {
+                "w": "heterogeneous",
+                "m": "diverse in character or content; made up of different elements",
+                "index": 4
+            },
+            {
+                "w": "empirical",
+                "m": "based on observation and experience, rather than theory or pure logic",
+                "index": 5
+            },
+            {
+                "w": "intransigent",
+                "m": "unwilling to change one's beliefs or course of action; stubborn",
+                "index": 6
+            },
+            {
+                "w": "innocuous",
+                "m": "not harmful or offensive; harmless",
+                "index": 7
+            },
+            {
+                "w": "fecund",
+                "m": "capable of producing an abundance of offspring or new growth; fertile",
+                "index": 8
+            },
+            {
+                "w": "furtive",
+                "m": "attempting to avoid notice or attention; secretive",
+                "index": 9
+            },
+            {
+                "w": "disseminate",
+                "m": "to spread or disperse widely, especially information or knowledge",
+                "index": 0
+            },
+            {
+                "w": "brazen",
+                "m": "bold and without shame; shameless or impudent",
+                "index": 1
+            },
+            {
+                "w": "cacophonous",
+                "m": "producing a harsh, discordant mixture of sounds; noisy and unpleasant to listen to",
+                "index": -1
+            },
+            {
+                "w": "intimate",
+                "m": "to suggest or hint at indirectly; to make known subtly or indirectly; to imply",
+                "index": -1
+            },
+            {
+                "w": "imperious",
+                "m": "assuming power or authority without justification; arrogant and domineering",
+                "index": 4
+            },
+            {
+                "w": "engender",
+                "m": "to cause or give rise to a feeling, situation, or condition; to produce",
+                "index": 5
+            },
+            {
+                "w": "intrepid",
+                "m": "fearless and adventurous; brave",
+                "index": 6
+            },
+            {
+                "w": "momentary",
+                "m": "lasting for a very short time; brief",
+                "index": 7
+            },
+            {
+                "w": "feeble",
+                "m": "lacking physical strength, especially as a result of age or illness; weak",
+                "index": 8
+            },
+            {
+                "w": "hamper",
+                "m": "to hinder or impede the movement or progress of something or someone",
+                "index": 9
+            },
+            {
+                "w": "feasible",
+                "m": "possible to do easily or conveniently; likely or probable",
+                "index": 0
+            },
+            {
+                "w": "calumny",
+                "m": "the making of false and defamatory statements about someone; slander",
+                "index": 1
+            },
+            {
+                "w": "canonize",
+                "m": "to treat someone as a saint; to glorify or honor someone",
+                "index": 2
+            },
+            {
+                "w": "invigorate",
+                "m": "to give strength or energy to; to revitalize",
+                "index": 3
+            },
+            {
+                "w": "impertinent",
+                "m": "not showing proper respect; rude or irrelevant",
+                "index": 4
+            },
+            {
+                "w": "entitled",
+                "m": "believing oneself to be inherently deserving of privileges or special treatment",
+                "index": 5
+            },
+            {
+                "w": "irreverent",
+                "m": "showing a lack of respect for things that are generally taken seriously",
+                "index": 6
+            },
+            {
+                "w": "mundane",
+                "m": "lacking interest or excitement; dull and ordinary",
+                "index": 7
+            },
+            {
+                "w": "felicitous",
+                "m": "well-chosen or suited to the circumstances; pleasing and fortunate",
+                "index": 8
+            },
+            {
+                "w": "indispensable",
+                "m": "absolutely necessary; essential",
+                "index": 9
+            },
+            {
+                "w": "flout",
+                "m": "to openly disregard a rule, law, or convention; to defy or mock openly",
+                "index": 0
+            },
+            {
+                "w": "candid",
+                "m": "truthful and straightforward; honest",
+                "index": 1
+            },
+            {
+                "w": "censure",
+                "m": "to express strong disapproval or harsh criticism",
+                "index": 2
+            },
+            {
+                "w": "mitigate",
+                "m": "to make less severe, serious, or painful; to alleviate",
+                "index": 3
+            },
+            {
+                "w": "invasive",
+                "m": "intruding or spreading in a way that harms or annoys others",
+                "index": 4
+            },
+            {
+                "w": "pertinacious",
+                "m": "holding firmly to an opinion or course of action; stubborn",
+                "index": 5
+            },
+            {
+                "w": "loathe",
+                "m": "to feel intense dislike or disgust for; to detest",
+                "index": 6
+            },
+            {
+                "w": "nettlesome",
+                "m": "causing irritation or annoyance; vexing",
+                "index": 7
+            },
+            {
+                "w": "forbear",
+                "m": "to refrain from doing or using something; to hold back or resist",
+                "index": 8
+            },
+            {
+                "w": "lament",
+                "m": "to express grief, sorrow, or regret; to mourn",
+                "index": 9
+            },
+            {
+                "w": "homogeneous",
+                "m": "of the same kind; composed of similar or identical parts",
+                "index": 0
+            },
+            {
+                "w": "castigate",
+                "m": "to reprimand severely; to criticize or punish severely",
+                "index": 1
+            },
+            {
+                "w": "chicanery",
+                "m": "the use of deception or trickery to achieve one's goals; dishonest or unethical behavior",
+                "index": -1
+            },
+            {
+                "w": "obsolete",
+                "m": "no longer produced or used; out-of-date",
+                "index": 3
+            },
+            {
+                "w": "irresolute",
+                "m": "showing hesitancy; uncertain or indecisive",
+                "index": 4
+            },
+            {
+                "w": "presumptuous",
+                "m": "failing to observe the limits of what is permitted or appropriate; bold and arrogant",
+                "index": 5
+            },
+            {
+                "w": "malign",
+                "m": "to speak about someone in a spitefully critical manner; to defame",
+                "index": 6
+            },
+            {
+                "w": "nullify",
+                "m": "to make legally null and void; to invalidate",
+                "index": 7
+            },
+            {
+                "w": "haphazard",
+                "m": "lacking any obvious principle of organization; random",
+                "index": 8
+            },
+            {
+                "w": "myopic",
+                "m": "lacking imagination, foresight, or intellectual insight; shortsighted",
+                "index": 9
+            },
+            {
+                "w": "humdrum",
+                "m": "lacking excitement or variety; dull and monotonous",
+                "index": 0
+            },
+            {
+                "w": "caustic",
+                "m": "sarcastic in a scathing and bitter way; corrosive",
+                "index": 1
+            },
+            {
+                "w": "coalesce",
+                "m": "to come together and form one mass or whole; to unite",
+                "index": 2
+            },
+            {
+                "w": "opaque",
+                "m": "not able to be seen through; not transparent",
+                "index": 3
+            },
+            {
+                "w": "laudable",
+                "m": "deserving praise and commendation; praiseworthy",
+                "index": 4
+            },
+            {
+                "w": "probity",
+                "m": "the quality of having strong moral principles; honesty and integrity",
+                "index": 5
+            },
+            {
+                "w": "malleable",
+                "m": "easily influenced or changed; capable of being shaped or molded",
+                "index": 6
+            },
+            {
+                "w": "obviate",
+                "m": "to remove or avoid a need or difficulty; to prevent or eliminate",
+                "index": 7
+            },
+            {
+                "w": "hodgepodge",
+                "m": "a confused mixture or jumble of things",
+                "index": 8
+            },
+            {
+                "w": "nonchalant",
+                "m": "feeling or appearing casually calm and relaxed; indifferent",
+                "index": 9
+            },
+            {
+                "w": "insipid",
+                "m": "lacking flavor or zest; dull and uninteresting",
+                "index": 0
+            },
+            {
+                "w": "construe",
+                "m": "to interpret or understand the meaning of something; to construe",
+                "index": 1
+            },
+            {
+                "w": "cogent",
+                "m": "clear, logical, and convincing; compelling",
+                "index": 2
+            },
+            {
+                "w": "paradigmatic",
+                "m": "of or relating to a typical example or pattern; archetypal",
+                "index": 3
+            },
+            {
+                "w": "lax",
+                "m": "not sufficiently strict, severe, or careful; relaxed",
+                "index": 4
+            },
+            {
+                "w": "proliferate",
+                "m": "to increase rapidly in number; to multiply",
+                "index": 5
+            },
+            {
+                "w": "neophyte",
+                "m": "a person who is new to a subject, skill, or belief; a beginner",
+                "index": 6
+            },
+            {
+                "w": "omnipresent",
+                "m": "present everywhere at the same time; ubiquitous",
+                "index": 7
+            },
+            {
+                "w": "impede",
+                "m": "to delay or prevent someone or something by obstructing or hindering",
+                "index": 8
+            },
+            {
+                "w": "partial",
+                "m": "favoring one side or party more than the others; biased or prejudiced",
+                "index": 9
+            },
+            {
+                "w": "loquacious",
+                "m": "tending to talk a great deal; talkative",
+                "index": 0
+            },
+            {
+                "w": "contrite",
+                "m": "feeling remorse or guilt for one's actions; repentant",
+                "index": 1
+            },
+            {
+                "w": "compelling",
+                "m": "evoking interest, attention, or admiration in a powerfully irresistible way",
+                "index": 2
+            },
+            {
+                "w": "pedantic",
+                "m": "excessively concerned with minor details and rules; overly precise",
+                "index": 3
+            },
+            {
+                "w": "marginalize",
+                "m": "to treat as insignificant or peripheral; to relegate to an unimportant position",
+                "index": 4
+            },
+            {
+                "w": "specious",
+                "m": "superficially plausible, but actually wrong; misleadingly attractive",
+                "index": 5
+            },
+            {
+                "w": "ostracize",
+                "m": "to exclude or reject someone from a group or society; to shun",
+                "index": -1
+            },
+            {
+                "w": "prodigious",
+                "m": "remarkably or impressively great in extent, size, or degree",
+                "index": 20
+            },
+            {
+                "w": "lucid",
+                "m": "expressed clearly; easy to understand; mentally clear and rational",
+                "index": 14
+            },
+            {
+                "w": "penchant",
+                "m": "a strong or habitual liking for something; a tendency to do something",
+                "index": 26
+            },
+            {
+                "w": "indigent",
+                "m": "poor; needy; impoverished",
+                "index": -1
+            },
+            {
+                "w": "profound",
+                "m": "very great or intense; having intellectual depth and insight",
+                "index": 21
+            },
+            {
+                "w": "reproach",
+                "m": "to address someone in such a way as to express disapproval or disappointment",
+                "index": 6
+            },
+            {
+                "w": "precipitate",
+                "m": "to cause an event or situation to happen suddenly or unexpectedly",
+                "index": 3
+            },
+            {
+                "w": "pervasive",
+                "m": "spreading widely throughout an area or a group of people; prevalent and influential; widespread",
+                "index": -1
+            },
+            {
+                "w": "placate",
+                "m": "to make someone less angry or hostile; to appease or pacify",
+                "index": 0
+            },
+            {
+                "w": "refute",
+                "m": "to prove a statement, theory, or claim to be false; to disprove",
+                "index": 21
+            },
+            {
+                "w": "pompous",
+                "m": "affectedly and irritatingly grand, solemn, or self-important",
+                "index": -1
+            },
+            {
+                "w": "pristine",
+                "m": "in its original condition; unspoiled; clean and fresh",
+                "index": 6
+            },
+            {
+                "w": "prosaic",
+                "m": "commonplace; unromantic; lacking poetic beauty",
+                "index": 4
+            },
+            {
+                "w": "quixotic",
+                "m": "exceedingly idealistic; unrealistic and impractical",
+                "index": 0
+            },
+            {
+                "w": "rebuff",
+                "m": "to reject or criticize sharply; to repel or drive back",
+                "index": -1
+            },
+            {
+                "w": "recalcitrant",
+                "m": "having an obstinately uncooperative attitude toward authority or discipline",
+                "index": -1
+            },
+            {
+                "w": "recant",
+                "m": "to withdraw or renounce a belief or statement previously held",
+                "index": 26
+            },
+            {
+                "w": "recondite",
+                "m": "difficult to understand; obscure",
+                "index": 3
+            },
+            {
+                "w": "refulgent",
+                "m": "shining brightly; radiant; resplendent",
+                "index": -1
+            },
+            {
+                "w": "relegate",
+                "m": "to consign or dismiss to an inferior rank or position",
+                "index": 25
+            },
+            {
+                "w": "remiss",
+                "m": "lacking care or attention to duty; negligent",
+                "index": -1
+            },
+            {
+                "w": "renounce",
+                "m": "to formally declare one's abandonment of a claim, right, or possession",
+                "index": 11
+            },
+            {
+                "w": "rescind",
+                "m": "to revoke, cancel, or repeal a law, order, or agreement",
+                "index": -1
+            },
+            {
+                "w": "rhetoric",
+                "m": "the art of effective or persuasive speaking or writing",
+                "index": 23
+            },
+            {
+                "w": "sardonic",
+                "m": "grimly mocking or cynical; sarcastic",
+                "index": -1
+            },
+            {
+                "w": "sedulous",
+                "m": "showing dedication and diligence; assiduous",
+                "index": 6
+            },
+            {
+                "w": "soporific",
+                "m": "tending to induce drowsiness or sleep; sleep-inducing",
+                "index": 6
+            },
+            {
+                "w": "spurious",
+                "m": "false or fake; not genuine",
+                "index": 5
+            },
+            {
+                "w": "stoic",
+                "m": "enduring pain and hardship without showing one's feelings or complaining",
+                "index": 9
+            },
+            {
+                "w": "sublime",
+                "m": "of such excellence, grandeur, or beauty as to inspire great admiration",
+                "index": -1
+            },
+            {
+                "w": "supplant",
+                "m": "to supersede and replace; to take the place of",
+                "index": 24
+            },
+            {
+                "w": "taciturn",
+                "m": "reserved or uncommunicative in speech; saying little",
+                "index": 0
+            },
+            {
+                "w": "tenuous",
+                "m": "very weak or slight; insubstantial",
+                "index": -1
+            },
+            {
+                "w": "travesty",
+                "m": "a false, absurd, or distorted representation of something",
+                "index": -1
+            },
+            {
+                "w": "truculent",
+                "m": "eager or quick to argue or fight; aggressively defiant",
+                "index": 10
+            },
+            {
+                "w": "ubiquitous",
+                "m": "present, appearing, or found everywhere; widespread",
+                "index": 5
+            },
+            {
+                "w": "unfettered",
+                "m": "free from restraint or inhibition; unrestrained",
+                "index": -1
+            },
+            {
+                "w": "unwarranted",
+                "m": "not justified or authorized; unnecessary; uncalled for",
+                "index": -1
+            },
+            {
+                "w": "usurp",
+                "m": "to take a position of power or importance illegally or by force",
+                "index": -1
+            },
+            {
+                "w": "vacillate",
+                "m": "to waver between different opinions or actions; to be indecisive",
+                "index": 3
+            },
+            {
+                "w": "venerable",
+                "m": "accorded a great deal of respect, especially because of age, wisdom, or character",
+                "index": -1
+            },
+            {
+                "w": "veracity",
+                "m": "accuracy or truthfulness, especially regarding factual information",
+                "index": 14
+            },
+            {
+                "w": "verisimilitude",
+                "m": "the appearance of being true or real; likelihood",
+                "index": 11
+            },
+            {
+                "w": "vicarious",
+                "m": "experienced in the imagination through the feelings or actions of another person",
+                "index": -1
+            },
+            {
+                "w": "vitriolic",
+                "m": "filled with bitter criticism or malice; caustic",
+                "index": -1
+            },
+            {
+                "w": "vociferous",
+                "m": "crying out noisily; clamorous; loud",
+                "index": 15
+            },
+            {
+                "w": "wanton",
+                "m": "deliberate and unprovoked; malicious; unrestrained",
+                "index": -1
+            },
+            {
+                "w": "zealous",
+                "m": "showing great energy, enthusiasm, or devotion; fervent",
+                "index": 4
+            },
+            {
+                "w": "plastic",
+                "m": "easily shaped or molded; flexible and adaptable",
+                "index": 6
+            },
+            {
+                "w": "oust",
+                "m": "to drive out or expel from a position or place",
+                "index": 7
+            },
+            {
+                "w": "impetuous",
+                "m": "acting or done quickly and without thought or care; impulsive",
+                "index": 8
+            },
+            {
+                "w": "pensive",
+                "m": "engaged in deep or serious thought; reflective",
+                "index": 9
+            },
+            {
+                "w": "misanthropic",
+                "m": "disliking humankind and avoiding human society",
+                "index": 0
+            },
+            {
+                "w": "convoluted",
+                "m": "extremely complex and difficult to follow; intricate",
+                "index": 1
+            },
+            {
+                "w": "contend",
+                "m": "to struggle to surmount (a difficulty) or to assert something as a position in an argument",
+                "index": 2
+            },
+            {
+                "w": "placid",
+                "m": "calm and peaceful, with little movement or activity",
+                "index": 3
+            },
+            {
+                "w": "panache",
+                "m": "a flamboyant confidence of style or manner; flair",
+                "index": 4
+            },
+            {
+                "w": "platitude",
+                "m": "a remark or statement, especially one with a moral content, that has been used too often to be interesting or thoughtful; a clich\u00e9",
+                "index": 6
+            },
+            {
+                "w": "palpable",
+                "m": "able to be touched or felt; tangible",
+                "index": 7
+            },
+            {
+                "w": "irascible",
+                "m": "having or showing a tendency to be easily angered",
+                "index": 8
+            },
+            {
+                "w": "portend",
+                "m": "to be a sign or warning that (something, especially something momentous or calamitous) is likely to happen",
+                "index": 9
+            },
+            {
+                "w": "misnomer",
+                "m": "a wrong or inaccurate name or designation",
+                "index": 0
+            },
+            {
+                "w": "covet",
+                "m": "to desire or wish for something, especially something belonging to someone else",
+                "index": 1
+            },
+            {
+                "w": "copious",
+                "m": "abundant in quantity or number; plentiful; large in amount or number",
+                "index": -1
+            },
+            {
+                "w": "polemical",
+                "m": "involving strongly critical, controversial, or disputatious writing or speech",
+                "index": 3
+            },
+            {
+                "w": "plodding",
+                "m": "slow-moving and unexciting; lacking in liveliness or speed",
+                "index": 4
+            },
+            {
+                "w": "subjective",
+                "m": "based on or influenced by personal feelings, tastes, or opinions",
+                "index": 5
+            },
+            {
+                "w": "prescient",
+                "m": "having or showing knowledge of events before they take place; having foresight",
+                "index": 6
+            },
+            {
+                "w": "perfidy",
+                "m": "deceitfulness; untrustworthiness",
+                "index": 7
+            },
+            {
+                "w": "mercenary",
+                "m": "primarily concerned with making money at the expense of ethics; motivated by financial gain",
+                "index": 8
+            },
+            {
+                "w": "provincial",
+                "m": "relating to a province; of or concerning the regions outside the capital city of a country, especially when regarded as unsophisticated or narrow-minded",
+                "index": 9
+            },
+            {
+                "w": "negligent",
+                "m": "failing to take proper care in doing something; careless or irresponsible",
+                "index": 0
+            },
+            {
+                "w": "craven",
+                "m": "contemptibly lacking in courage; cowardly",
+                "index": 1
+            },
+            {
+                "w": "cosmopolitan",
+                "m": "familiar with and at ease in many different countries and cultures; worldly",
+                "index": 2
+            },
+            {
+                "w": "subvert",
+                "m": "to undermine the power and authority of (an established system or institution)",
+                "index": 5
+            },
+            {
+                "w": "profuse",
+                "m": "exuberantly plentiful; abundant",
+                "index": 7
+            },
+            {
+                "w": "meticulous",
+                "m": "showing great attention to detail; very careful and precise",
+                "index": 8
+            },
+            {
+                "w": "rudimentary",
+                "m": "involving or limited to basic principles; basic or elementary",
+                "index": 9
+            },
+            {
+                "w": "obsequious",
+                "m": "obedient or attentive to an excessive or servile degree",
+                "index": 0
+            },
+            {
+                "w": "decorum",
+                "m": "behavior in keeping with good taste and propriety; etiquette",
+                "index": 1
+            },
+            {
+                "w": "deference",
+                "m": "humble submission and respect",
+                "index": 2
+            },
+            {
+                "w": "profundity",
+                "m": "deep insight; great depth of knowledge or thought",
+                "index": 3
+            },
+            {
+                "w": "remedial",
+                "m": "giving or intended as a remedy or cure; providing a remedy",
+                "index": 4
+            },
+            {
+                "w": "timorous",
+                "m": "showing or suffering from nervousness, fear, or a lack of confidence",
+                "index": 5
+            },
+            {
+                "w": "pugnacious",
+                "m": "eager or quick to argue, quarrel, or fight",
+                "index": 7
+            },
+            {
+                "w": "mordant",
+                "m": "having or showing a sharp or critical quality; biting",
+                "index": 8
+            },
+            {
+                "w": "salutary",
+                "m": "producing good effects; beneficial",
+                "index": 9
+            },
+            {
+                "w": "deft",
+                "m": "neatly skillful and quick in one's movements; demonstrating skill and cleverness",
+                "index": 1
+            },
+            {
+                "w": "desultory",
+                "m": "lacking a clear plan, purpose, or direction; random; without a definite plan or purpose",
+                "index": -1
+            },
+            {
+                "w": "prophetic",
+                "m": "accurately predicting what will happen in the future",
+                "index": 3
+            },
+            {
+                "w": "restive",
+                "m": "unable to keep still or silent and becoming increasingly difficult to control, especially because of impatience, dissatisfaction, or boredom",
+                "index": 4
+            },
+            {
+                "w": "tortuous",
+                "m": "full of twists and turns; excessively lengthy and complex",
+                "index": 5
+            },
+            {
+                "w": "robust",
+                "m": "strong and healthy; vigorous",
+                "index": 6
+            },
+            {
+                "w": "sagacious",
+                "m": "having or showing keen mental discernment and good judgment; shrewd",
+                "index": 7
+            },
+            {
+                "w": "outstrip",
+                "m": "to surpass or exceed in amount, extent, or performance",
+                "index": 8
+            },
+            {
+                "w": "sever",
+                "m": "to divide by cutting or slicing, especially suddenly and forcibly",
+                "index": 9
+            },
+            {
+                "w": "proclivity",
+                "m": "a tendency to choose or do something regularly; an inclination or predisposition toward a particular thing",
+                "index": 0
+            },
+            {
+                "w": "demur",
+                "m": "to raise objections or show reluctance; to hesitate",
+                "index": 1
+            },
+            {
+                "w": "diffident",
+                "m": "modest or shy because of a lack of self-confidence",
+                "index": 2
+            },
+            {
+                "w": "prudent",
+                "m": "acting with or showing care and thought for the future; wise",
+                "index": 3
+            },
+            {
+                "w": "sporadic",
+                "m": "occurring at irregular intervals or only in a few places; scattered or isolated",
+                "index": 4
+            },
+            {
+                "w": "tractable",
+                "m": "easy to control or influence; obedient",
+                "index": 5
+            },
+            {
+                "w": "salubrious",
+                "m": "health-giving; healthy",
+                "index": 6
+            },
+            {
+                "w": "sanguine",
+                "m": "optimistic or positive, especially in an apparently bad or difficult situation",
+                "index": 7
+            },
+            {
+                "w": "precarious",
+                "m": "not securely held or in position; dangerously likely to fall or collapse",
+                "index": 8
+            },
+            {
+                "w": "slight",
+                "m": "small in degree; inconsiderable",
+                "index": 9
+            },
+            {
+                "w": "puerile",
+                "m": "childishly silly and trivial; immature",
+                "index": 0
+            },
+            {
+                "w": "derivative",
+                "m": "imitative of the work of another person, and usually disapproved of for that reason",
+                "index": 1
+            },
+            {
+                "w": "dilatory",
+                "m": "tending to cause delay; slow to act; intended to waste time or procrastinate",
+                "index": -1
+            },
+            {
+                "w": "punctilious",
+                "m": "showing great attention to detail or correct behavior",
+                "index": 3
+            },
+            {
+                "w": "stigmatize",
+                "m": "to describe or regard as worthy of disgrace or great disapproval",
+                "index": 4
+            },
+            {
+                "w": "transient",
+                "m": "lasting only for a short time; temporary",
+                "index": 5
+            },
+            {
+                "w": "sanction",
+                "m": "a threatened penalty for disobeying a law or rule; official permission or approval for an action",
+                "index": 6
+            },
+            {
+                "w": "scant",
+                "m": "barely sufficient or adequate; in short supply",
+                "index": 7
+            },
+            {
+                "w": "quirky",
+                "m": "characterized by peculiar or unexpected traits; unconventional",
+                "index": 8
+            },
+            {
+                "w": "somnolent",
+                "m": "feeling sleepy; drowsy",
+                "index": 9
+            },
+            {
+                "w": "desiccate",
+                "m": "to remove the moisture from (something, especially food), typically in order to preserve it",
+                "index": 1
+            },
+            {
+                "w": "equivocate",
+                "m": "to use ambiguous language so as to conceal the truth or avoid committing oneself",
+                "index": 2
+            },
+            {
+                "w": "undermine",
+                "m": "to damage or weaken (someone or something), especially gradually or insidiously",
+                "index": 4
+            },
+            {
+                "w": "skullduggery",
+                "m": "underhanded or unscrupulous behavior; trickery",
+                "index": 7
+            },
+            {
+                "w": "repudiate",
+                "m": "to refuse to accept or be associated with; to deny the truth or validity of",
+                "index": 8
+            },
+            {
+                "w": "spendthrift",
+                "m": "a person who spends money in an extravagant, irresponsible way",
+                "index": 0
+            },
+            {
+                "w": "diatribe",
+                "m": "a forceful and bitter verbal attack against someone or something",
+                "index": 1
+            },
+            {
+                "w": "polarize",
+                "m": "to divide or cause to divide into two sharply contrasting groups or sets of opinions or beliefs",
+                "index": 2
+            },
+            {
+                "w": "scrupulous",
+                "m": "diligent, thorough, and extremely attentive to details; having strong moral principles",
+                "index": 3
+            },
+            {
+                "w": "utterly",
+                "m": "completely and without qualification; absolutely",
+                "index": 4
+            },
+            {
+                "w": "underscore",
+                "m": "to emphasize or draw attention to something",
+                "index": 5
+            },
+            {
+                "w": "trivial",
+                "m": "of little value or importance",
+                "index": 7
+            },
+            {
+                "w": "tact",
+                "m": "adroitness and sensitivity in dealing with others or difficult issues",
+                "index": 8
+            },
+            {
+                "w": "supersede",
+                "m": "to take the place of (a person or thing previously in authority or use); to supplant",
+                "index": 9
+            },
+            {
+                "w": "incredulous",
+                "m": "unwilling or unable to believe something",
+                "index": 1
+            },
+            {
+                "w": "prodigal",
+                "m": "spending money or resources freely and recklessly; wastefully extravagant",
+                "index": 2
+            },
+            {
+                "w": "tranquil",
+                "m": "free from disturbance; calm",
+                "index": 3
+            },
+            {
+                "w": "weary",
+                "m": "feeling or showing tiredness, especially as a result of excessive exertion or lack of sleep",
+                "index": 4
+            },
+            {
+                "w": "venal",
+                "m": "showing or motivated by susceptibility to bribery; corrupt",
+                "index": 5
+            },
+            {
+                "w": "stern",
+                "m": "serious and unrelenting, especially in the assertion of authority and exercise of discipline",
+                "index": 6
+            },
+            {
+                "w": "utilitarian",
+                "m": "designed to be useful or practical rather than attractive",
+                "index": 7
+            },
+            {
+                "w": "trifling",
+                "m": "unimportant or trivial",
+                "index": 8
+            },
+            {
+                "w": "tout",
+                "m": "to attempt to sell (something), typically by pestering people in an aggressive or bold manner",
+                "index": 9
+            },
+            {
+                "w": "wary",
+                "m": "feeling or showing caution about possible dangers or problems",
+                "index": 0
+            },
+            {
+                "w": "ingenuous",
+                "m": "innocent and unsuspecting; naive",
+                "index": 1
+            },
+            {
+                "w": "verbose",
+                "m": "using or expressed in more words than are needed",
+                "index": 2
+            },
+            {
+                "w": "venerate",
+                "m": "to regard with great respect; to revere",
+                "index": 5
+            },
+            {
+                "w": "tendentious",
+                "m": "expressing or intending to promote a particular cause or point of view, especially a controversial one",
+                "index": 6
+            },
+            {
+                "w": "vapid",
+                "m": "offering nothing that is stimulating or challenging; bland",
+                "index": 7
+            },
+            {
+                "w": "turbulent",
+                "m": "characterized by conflict, disorder, or confusion; not controlled or calm",
+                "index": 8
+            },
+            {
+                "w": "wane",
+                "m": "to decrease in vigor, power, or extent; to become weaker",
+                "index": 9
+            },
+            {
+                "w": "abhor",
+                "m": "to regard with disgust and hatred; to loathe",
+                "index": 10
+            },
+            {
+                "w": "acrimonious",
+                "m": "marked by strong resentment or bitterness; caustic, biting, or harsh in speech or manner",
+                "index": -1
+            },
+            {
+                "w": "affinity",
+                "m": "a spontaneous or natural liking or sympathy for someone or something",
+                "index": 12
+            },
+            {
+                "w": "acquiesce",
+                "m": "to accept something reluctantly but without protest",
+                "index": 13
+            },
+            {
+                "w": "alienate",
+                "m": "to cause someone to feel isolated or estranged",
+                "index": 14
+            },
+            {
+                "w": "antedate",
+                "m": "to precede in time; to come before something else",
+                "index": 15
+            },
+            {
+                "w": "acclaim",
+                "m": "to praise enthusiastically and publicly",
+                "index": 16
+            },
+            {
+                "w": "boisterous",
+                "m": "noisy, energetic, and cheerful; rowdy",
+                "index": 10
+            },
+            {
+                "w": "belligerent",
+                "m": "hostile and aggressive; eager to fight",
+                "index": 11
+            },
+            {
+                "w": "altruistic",
+                "m": "showing a disinterested and selfless concern for the well-being of others; unselfish",
+                "index": 12
+            },
+            {
+                "w": "adroit",
+                "m": "clever or skillful in using the hands or mind",
+                "index": 13
+            },
+            {
+                "w": "apathy",
+                "m": "lack of interest, enthusiasm, or concern; indifference",
+                "index": 14
+            },
+            {
+                "w": "banish",
+                "m": "to send someone away from a country or place as an official punishment",
+                "index": 15
+            },
+            {
+                "w": "ascertain",
+                "m": "to find (something) out for certain; to make sure of",
+                "index": 16
+            },
+            {
+                "w": "chivalrous",
+                "m": "being courteous and gallant, especially towards women",
+                "index": 10
+            },
+            {
+                "w": "beneficent",
+                "m": "generous or doing good; resulting in good",
+                "index": 11
+            },
+            {
+                "w": "baroque",
+                "m": "characterized by elaborate and ornate detail",
+                "index": 12
+            },
+            {
+                "w": "amend",
+                "m": "to make minor changes to (a text, piece of legislation, etc.) to make it fairer or more accurate",
+                "index": 13
+            },
+            {
+                "w": "apropos",
+                "m": "with reference to; concerning",
+                "index": 14
+            },
+            {
+                "w": "bridle",
+                "m": "to show one's resentment or anger, especially by throwing up the head and drawing in the chin",
+                "index": 15
+            },
+            {
+                "w": "assertive",
+                "m": "having or showing a confident and forceful personality",
+                "index": 16
+            },
+            {
+                "w": "churlish",
+                "m": "rude in a mean-spirited and surly way",
+                "index": 10
+            },
+            {
+                "w": "canny",
+                "m": "having or showing shrewdness and good judgment, especially in money or business matters",
+                "index": 11
+            },
+            {
+                "w": "byzantine",
+                "m": "excessively complicated, typically involving a great deal of administrative detail",
+                "index": 12
+            },
+            {
+                "w": "animus",
+                "m": "a strong feeling of dislike or enmity; hostility",
+                "index": 13
+            },
+            {
+                "w": "apt",
+                "m": "appropriate or suitable in the circumstances; having a tendency to do something",
+                "index": 14
+            },
+            {
+                "w": "comply",
+                "m": "to act in accordance with a wish, command, or rule",
+                "index": 15
+            },
+            {
+                "w": "bogus",
+                "m": "not genuine or true; fake",
+                "index": 16
+            },
+            {
+                "w": "clandestine",
+                "m": "kept secret or done secretly, especially because illicit",
+                "index": 10
+            },
+            {
+                "w": "cavalier",
+                "m": "showing a lack of proper concern; offhand",
+                "index": 11
+            },
+            {
+                "w": "compromise",
+                "m": "an agreement or settlement of a dispute that is reached by each side making concessions",
+                "index": 12
+            },
+            {
+                "w": "apologist",
+                "m": "a person who offers an argument in defense of something controversial",
+                "index": 13
+            },
+            {
+                "w": "cloak",
+                "m": "to hide, cover, or disguise something",
+                "index": 14
+            },
+            {
+                "w": "crestfallen",
+                "m": "sad and disappointed",
+                "index": 15
+            },
+            {
+                "w": "cataclysmic",
+                "m": "relating to a violent upheaval or catastrophe; causing sudden and widespread destruction or disaster",
+                "index": -1
+            },
+            {
+                "w": "complacent",
+                "m": "showing smug or uncritical satisfaction with oneself or one's achievements",
+                "index": 10
+            },
+            {
+                "w": "distressed",
+                "m": "suffering from anxiety, sorrow, or pain; showing signs of anxiety or strain",
+                "index": -1
+            },
+            {
+                "w": "conciliatory",
+                "m": "intended or likely to placate or pacify",
+                "index": 12
+            },
+            {
+                "w": "astringent",
+                "m": "causing the contraction of body tissues, typically of the skin",
+                "index": 13
+            },
+            {
+                "w": "consensus",
+                "m": "a general agreement",
+                "index": 14
+            },
+            {
+                "w": "curtail",
+                "m": "to reduce in extent or quantity; to impose a restriction",
+                "index": 15
+            },
+            {
+                "w": "circumscribe",
+                "m": "to restrict (something) within limits",
+                "index": 16
+            },
+            {
+                "w": "cumbersome",
+                "m": "large or heavy and therefore difficult to carry or use",
+                "index": 10
+            },
+            {
+                "w": "dwindling",
+                "m": "diminishing gradually in size, amount, or strength",
+                "index": 11
+            },
+            {
+                "w": "countenance",
+                "m": "a person's face or facial expression; support or approval",
+                "index": 12
+            },
+            {
+                "w": "collaborate",
+                "m": "to work jointly on an activity, especially to produce or create something",
+                "index": 13
+            },
+            {
+                "w": "distort",
+                "m": "to give a misleading or false account or impression of; to twist out of shape",
+                "index": 14
+            },
+            {
+                "w": "elucidate",
+                "m": "to make (something) clear; to explain",
+                "index": 15
+            },
+            {
+                "w": "complementary",
+                "m": "combining in such a way as to enhance or emphasize the qualities of each other",
+                "index": 16
+            },
+            {
+                "w": "debilitating",
+                "m": "making someone very weak and infirm",
+                "index": 10
+            },
+            {
+                "w": "eclipse",
+                "m": "to obscure the light from or to overshadow",
+                "index": 11
+            },
+            {
+                "w": "covert",
+                "m": "not openly acknowledged or displayed; secret",
+                "index": 12
+            },
+            {
+                "w": "competent",
+                "m": "having the necessary ability, knowledge, or skill to do something successfully",
+                "index": 13
+            },
+            {
+                "w": "divergent",
+                "m": "tending to be different or develop in different directions",
+                "index": 14
+            },
+            {
+                "w": "evade",
+                "m": "to escape or avoid, especially by cleverness or trickery",
+                "index": 15
+            },
+            {
+                "w": "contentious",
+                "m": "causing or likely to cause an argument; controversial",
+                "index": 16
+            },
+            {
+                "w": "deliberate",
+                "m": "done consciously and intentionally",
+                "index": 10
+            },
+            {
+                "w": "encyclopedic",
+                "m": "comprehensive and extensive in knowledge, covering a wide range of subjects or topics",
+                "index": -1
+            },
+            {
+                "w": "credible",
+                "m": "able to be believed; convincing",
+                "index": 12
+            },
+            {
+                "w": "correlate",
+                "m": "to have a mutual relationship or connection",
+                "index": 13
+            },
+            {
+                "w": "elated",
+                "m": "very happy or proud; jubilant",
+                "index": 14
+            },
+            {
+                "w": "feckless",
+                "m": "lacking initiative or strength of character; irresponsible",
+                "index": 15
+            },
+            {
+                "w": "disingenuous",
+                "m": "not candid or sincere, typically by pretending that one knows less about something than one really does",
+                "index": 16
+            },
+            {
+                "w": "droll",
+                "m": "curious or unusual in a way that provokes dry amusement",
+                "index": 10
+            },
+            {
+                "w": "exacerbate",
+                "m": "to make (a problem, bad situation, or negative feeling) worse",
+                "index": 11
+            },
+            {
+                "w": "diffuse",
+                "m": "to spread or cause to spread over a wide area or among a large number of people",
+                "index": 12
+            },
+            {
+                "w": "deride",
+                "m": "to express contempt for; to ridicule",
+                "index": 13
+            },
+            {
+                "w": "enchant",
+                "m": "to fill (someone) with great delight; to captivate",
+                "index": 14
+            },
+            {
+                "w": "fester",
+                "m": "to become septic; to become rotten and offensive",
+                "index": 15
+            },
+            {
+                "w": "divulge",
+                "m": "to make known (private or sensitive information)",
+                "index": 16
+            },
+            {
+                "w": "eccentric",
+                "m": "unconventional and slightly strange; odd",
+                "index": 10
+            },
+            {
+                "w": "exasperated",
+                "m": "feeling intensely irritated and frustrated",
+                "index": 11
+            },
+            {
+                "w": "documentary",
+                "m": "consisting of, or based on, official documents",
+                "index": 12
+            },
+            {
+                "w": "dictate",
+                "m": "to lay down authoritatively; to prescribe",
+                "index": 13
+            },
+            {
+                "w": "entrenched",
+                "m": "established firmly and securely",
+                "index": 14
+            },
+            {
+                "w": "iconoclastic",
+                "m": "characterized by attacking or rejecting cherished beliefs and institutions or established values and practices",
+                "index": 15
+            },
+            {
+                "w": "dogmatic",
+                "m": "inclined to lay down principles as incontrovertibly true",
+                "index": 16
+            },
+            {
+                "w": "fractious",
+                "m": "easily irritated; bad-tempered; quarrelsome",
+                "index": 10
+            },
+            {
+                "w": "fungible",
+                "m": "able to be replaced or substituted by another identical item; mutually interchangeable",
+                "index": 11
+            },
+            {
+                "w": "exhaustive",
+                "m": "covering all possible details; thorough",
+                "index": 12
+            },
+            {
+                "w": "discreet",
+                "m": "careful and circumspect in one's speech or actions, especially to avoid causing offense or to gain an advantage",
+                "index": 13
+            },
+            {
+                "w": "exotic",
+                "m": "attractive or striking because it is unusual or different from what is familiar",
+                "index": 14
+            },
+            {
+                "w": "immure",
+                "m": "to enclose or confine (someone) against their will",
+                "index": 15
+            },
+            {
+                "w": "fallacious",
+                "m": "based on a mistaken belief; misleading",
+                "index": 16
+            },
+            {
+                "w": "limpid",
+                "m": "free of anything that darkens; completely clear",
+                "index": 10
+            },
+            {
+                "w": "hackneyed",
+                "m": "lacking significance through having been overused; unoriginal and trite",
+                "index": 11
+            },
+            {
+                "w": "exhilarating",
+                "m": "making (someone) feel very happy, animated, or elated",
+                "index": 12
+            },
+            {
+                "w": "divorced",
+                "m": "to separate or dissociate (something) from something else",
+                "index": 13
+            },
+            {
+                "w": "exploitative",
+                "m": "making use of a situation or treating others unfairly in order to gain an advantage or benefit",
+                "index": 14
+            },
+            {
+                "w": "improvise",
+                "m": "to create and perform (music, drama, or verse) spontaneously or without preparation",
+                "index": 15
+            },
+            {
+                "w": "foolhardy",
+                "m": "recklessly bold or rash",
+                "index": 16
+            },
+            {
+                "w": "mawkish",
+                "m": "sentimental in a feeble or sickly way",
+                "index": 10
+            },
+            {
+                "w": "incongruous",
+                "m": "not in harmony or keeping with the surroundings or other aspects of something",
+                "index": 11
+            },
+            {
+                "w": "extraneous",
+                "m": "irrelevant or unrelated to the subject being dealt with",
+                "index": 12
+            },
+            {
+                "w": "elitist",
+                "m": "favoring the elite; snobbish",
+                "index": 13
+            },
+            {
+                "w": "foreseeable",
+                "m": "able to be foreseen or predicted",
+                "index": 14
+            },
+            {
+                "w": "inhibit",
+                "m": "to hinder, restrain, or prevent (an action or process)",
+                "index": 15
+            },
+            {
+                "w": "hinder",
+                "m": "to create difficulties for (someone or something), resulting in delay or obstruction",
+                "index": 16
+            },
+            {
+                "w": "obeisance",
+                "m": "a gesture expressing deferential respect, such as a bow or curtsy",
+                "index": 10
+            },
+            {
+                "w": "interchangeable",
+                "m": "capable of being used in place of each other",
+                "index": 11
+            },
+            {
+                "w": "fervor",
+                "m": "intense and passionate feeling",
+                "index": 12
+            },
+            {
+                "w": "exacting",
+                "m": "making great demands on one's skill, attention, or other resources",
+                "index": 13
+            },
+            {
+                "w": "forsake",
+                "m": "to abandon or leave behind",
+                "index": 14
+            },
+            {
+                "w": "inscrutable",
+                "m": "impossible to understand or interpret",
+                "index": 15
+            },
+            {
+                "w": "impair",
+                "m": "to weaken or damage something (especially a human faculty or function)",
+                "index": 16
+            },
+            {
+                "w": "ostentatious",
+                "m": "characterized by vulgar or pretentious display; designed to impress or attract notice",
+                "index": 10
+            },
+            {
+                "w": "laconic",
+                "m": "using very few words; concise",
+                "index": 11
+            },
+            {
+                "w": "futile",
+                "m": "incapable of producing any useful result; pointless",
+                "index": 12
+            },
+            {
+                "w": "flummoxed",
+                "m": "bewildered or perplexed",
+                "index": 13
+            },
+            {
+                "w": "gratify",
+                "m": "to give (someone) pleasure or satisfaction",
+                "index": 14
+            },
+            {
+                "w": "lionize",
+                "m": "to treat (a person) as a celebrity; to give a lot of public attention and approval to (someone)",
+                "index": 15
+            },
+            {
+                "w": "impugn",
+                "m": "to dispute the truth, validity, or honesty of (a statement or motive); to call into question",
+                "index": 16
+            },
+            {
+                "w": "panacea",
+                "m": "a solution or remedy for all difficulties or diseases; a cure-all",
+                "index": 10
+            },
+            {
+                "w": "lucrative",
+                "m": "producing a great deal of profit; profitable",
+                "index": 11
+            },
+            {
+                "w": "illusory",
+                "m": "based on illusion; not real",
+                "index": 12
+            },
+            {
+                "w": "fruitful",
+                "m": "producing good or helpful results; productive",
+                "index": 13
+            },
+            {
+                "w": "heed",
+                "m": "to pay attention to; to take notice of",
+                "index": 14
+            },
+            {
+                "w": "monotonous",
+                "m": "dull, tedious, and repetitious; lacking in variety and interest",
+                "index": 15
+            },
+            {
+                "w": "incessant",
+                "m": "continuing without pause or interruption",
+                "index": 16
+            },
+            {
+                "w": "perfunctory",
+                "m": "done with little effort or care; hasty and superficial",
+                "index": 10
+            },
+            {
+                "w": "magisterial",
+                "m": "having or showing great authority",
+                "index": 11
+            },
+            {
+                "w": "invidious",
+                "m": "likely to arouse resentment or anger in others; unfairly discriminating",
+                "index": 12
+            },
+            {
+                "w": "inborn",
+                "m": "existing from birth; inborn; innate",
+                "index": 13
+            },
+            {
+                "w": "judicious",
+                "m": "having, showing, or done with good judgment or sense",
+                "index": 14
+            },
+            {
+                "w": "peculiar",
+                "m": "strange or odd; unusual",
+                "index": 15
+            },
+            {
+                "w": "inclined",
+                "m": "feeling willing or favorably disposed toward an action, belief, or attitude",
+                "index": 16
+            },
+            {
+                "w": "perilous",
+                "m": "full of danger or risk; hazardous",
+                "index": 10
+            },
+            {
+                "w": "onerous",
+                "m": "involving an amount of effort and difficulty that is oppressively burdensome",
+                "index": 11
+            },
+            {
+                "w": "lethargic",
+                "m": "affected by lethargy; sluggish and apathetic",
+                "index": 12
+            },
+            {
+                "w": "polymath",
+                "m": "a person of wide-ranging knowledge or learning",
+                "index": 13
+            },
+            {
+                "w": "premeditate",
+                "m": "to think out or plan (an action, especially a crime) beforehand",
+                "index": 15
+            },
+            {
+                "w": "inveterate",
+                "m": "having a particular habit, activity, or interest that is long-established and unlikely to change",
+                "index": 16
+            },
+            {
+                "w": "opprobrium",
+                "m": "harsh criticism or censure; public disgrace arising from shameful conduct",
+                "index": 11
+            },
+            {
+                "w": "metaphorical",
+                "m": "used in a way that is symbolic or representative",
+                "index": 12
+            },
+            {
+                "w": "reticent",
+                "m": "not revealing one's thoughts or feelings readily",
+                "index": 13
+            },
+            {
+                "w": "pertinent",
+                "m": "relevant or applicable to a particular matter; apposite",
+                "index": 14
+            },
+            {
+                "w": "profligate",
+                "m": "recklessly extravagant or wasteful in the use of resources",
+                "index": 15
+            },
+            {
+                "w": "miserly",
+                "m": "pennypinching; stingy; very reluctant to spend money",
+                "index": 16
+            },
+            {
+                "w": "preclude",
+                "m": "to prevent from happening; to make impossible",
+                "index": 10
+            },
+            {
+                "w": "parsimonious",
+                "m": "extremely unwilling to spend money or use resources",
+                "index": 11
+            },
+            {
+                "w": "mimic",
+                "m": "to imitate (someone or their actions or words), typically in order to entertain or ridicule",
+                "index": 12
+            },
+            {
+                "w": "stringent",
+                "m": "rigorously binding or exacting; strict",
+                "index": 13
+            },
+            {
+                "w": "propriety",
+                "m": "the state or quality of conforming to conventionally accepted standards of behavior or morals",
+                "index": 14
+            },
+            {
+                "w": "reconcile",
+                "m": "to restore friendly relations between",
+                "index": 15
+            },
+            {
+                "w": "patent",
+                "m": "easily recognizable; obvious",
+                "index": 16
+            },
+            {
+                "w": "predilection",
+                "m": "a preference or special liking for something; a tendency to favor or be inclined toward something",
+                "index": -1
+            },
+            {
+                "w": "peripheral",
+                "m": "relating to or situated on the edge or periphery of something",
+                "index": 11
+            },
+            {
+                "w": "numinous",
+                "m": "having a strong religious or spiritual quality; indicating or suggesting the presence of a divinity",
+                "index": 12
+            },
+            {
+                "w": "subservient",
+                "m": "prepared to obey others unquestioningly",
+                "index": 13
+            },
+            {
+                "w": "scintillating",
+                "m": "sparkling or shining brightly; brilliantly and excitingly clever or skillful",
+                "index": 14
+            },
+            {
+                "w": "refine",
+                "m": "to remove impurities or unwanted elements from (a substance), typically as part of an industrial process",
+                "index": 15
+            },
+            {
+                "w": "petulant",
+                "m": "childishly sulky or bad-tempered",
+                "index": 16
+            },
+            {
+                "w": "rapacious",
+                "m": "aggressively greedy or grasping",
+                "index": 10
+            },
+            {
+                "w": "provocative",
+                "m": "causing annoyance, anger, or another strong reaction, especially deliberately",
+                "index": 11
+            },
+            {
+                "w": "obscure",
+                "m": "not discovered or known about; uncertain",
+                "index": 12
+            },
+            {
+                "w": "surreptitious",
+                "m": "kept secret, especially because it would not be approved of",
+                "index": 13
+            },
+            {
+                "w": "sensational",
+                "m": "causing great public interest and excitement",
+                "index": 14
+            },
+            {
+                "w": "relinquish",
+                "m": "to voluntarily cease to keep or claim; to give up",
+                "index": 15
+            },
+            {
+                "w": "pithy",
+                "m": "concise and forcefully expressive",
+                "index": 16
+            },
+            {
+                "w": "relish",
+                "m": "great enjoyment; to enjoy greatly",
+                "index": 10
+            },
+            {
+                "w": "overt",
+                "m": "done or shown openly; not secret or hidden",
+                "index": 12
+            },
+            {
+                "w": "tantalizing",
+                "m": "tormenting or teasing with the sight or promise of something that is unobtainable",
+                "index": 13
+            },
+            {
+                "w": "sophisticated",
+                "m": "having, revealing, or proceeding from a great deal of worldly experience and knowledge of fashion and culture",
+                "index": 14
+            },
+            {
+                "w": "ruminate",
+                "m": "to think deeply about something",
+                "index": 15
+            },
+            {
+                "w": "pliant",
+                "m": "easily bent; flexible",
+                "index": 16
+            },
+            {
+                "w": "satirical",
+                "m": "using irony, sarcasm, or ridicule to expose and criticize people's stupidity or vices",
+                "index": 10
+            },
+            {
+                "w": "tempestuous",
+                "m": "characterized by strong and turbulent or conflicting emotion",
+                "index": 11
+            },
+            {
+                "w": "pellucid",
+                "m": "transparently clear; easily understandable",
+                "index": 12
+            },
+            {
+                "w": "tantamount",
+                "m": "equivalent in seriousness to; virtually the same as",
+                "index": 13
+            },
+            {
+                "w": "strife",
+                "m": "angry or bitter disagreement over fundamental issues; conflict",
+                "index": 14
+            },
+            {
+                "w": "skittish",
+                "m": "nervous or excitable; easily scared",
+                "index": 15
+            },
+            {
+                "w": "sanctimonious",
+                "m": "making a show of being morally superior to other people",
+                "index": 16
+            },
+            {
+                "w": "sham",
+                "m": "a thing that is not what it is purported to be",
+                "index": 10
+            },
+            {
+                "w": "tenable",
+                "m": "able to be maintained or defended against attack or objection",
+                "index": 11
+            },
+            {
+                "w": "perpetuate",
+                "m": "to make (something, typically an undesirable situation or an unfounded belief) continue indefinitely",
+                "index": 12
+            },
+            {
+                "w": "torpor",
+                "m": "a state of physical or mental inactivity; lethargy",
+                "index": 13
+            },
+            {
+                "w": "understated",
+                "m": "presented or expressed in a subtle and effective way",
+                "index": 14
+            },
+            {
+                "w": "superfluous",
+                "m": "unnecessary, especially through being more than enough",
+                "index": 15
+            },
+            {
+                "w": "sound",
+                "m": "in good condition; solid and in good working order",
+                "index": 16
+            },
+            {
+                "w": "skirt",
+                "m": "to go around or past the edge of",
+                "index": 10
+            },
+            {
+                "w": "transgression",
+                "m": "an act that goes against a law, rule, or code of conduct; an offense",
+                "index": 11
+            },
+            {
+                "w": "rational",
+                "m": "based on or in accordance with reason or logic",
+                "index": 12
+            },
+            {
+                "w": "trenchant",
+                "m": "vigorous or incisive in expression or style",
+                "index": 13
+            },
+            {
+                "w": "unscrupulous",
+                "m": "having or showing no moral principles; not honest or fair",
+                "index": 14
+            },
+            {
+                "w": "synoptic",
+                "m": "providing a concise overview or summary; giving a broad view or perspective",
+                "index": -1
+            },
+            {
+                "w": "tarnish",
+                "m": "to damage or ruin the quality or reputation of",
+                "index": 16
+            },
+            {
+                "w": "sluggish",
+                "m": "slow-moving or inactive",
+                "index": 10
+            },
+            {
+                "w": "urbane",
+                "m": "suave, courteous, and refined in manner",
+                "index": 11
+            },
+            {
+                "w": "scathing",
+                "m": "severely critical; harshly condemning",
+                "index": 12
+            },
+            {
+                "w": "umbrage",
+                "m": "offense or annoyance",
+                "index": 13
+            },
+            {
+                "w": "thorough",
+                "m": "complete with regard to every detail; not superficial or partial",
+                "index": 15
+            },
+            {
+                "w": "tepid",
+                "m": "lukewarm; showing little enthusiasm",
+                "index": 16
+            },
+            {
+                "w": "spartan",
+                "m": "showing or characterized by austerity or a lack of comfort or luxury",
+                "index": 10
+            },
+            {
+                "w": "subtle",
+                "m": "delicate and precise as to be difficult to analyze or describe",
+                "index": 12
+            },
+            {
+                "w": "versatile",
+                "m": "able to adapt or be adapted to many different functions or activities",
+                "index": 13
+            },
+            {
+                "w": "virulent",
+                "m": "extremely severe or harmful in its effects; bitterly hostile",
+                "index": 14
+            },
+            {
+                "w": "visionary",
+                "m": "thinking about or planning the future with imagination or wisdom",
+                "index": 15
+            },
+            {
+                "w": "upbraid",
+                "m": "to find fault with (someone); scold",
+                "index": 16
+            },
+            {
+                "w": "vitiate",
+                "m": "to spoil or impair the quality or efficiency of",
+                "index": 11
+            },
+            {
+                "w": "superficial",
+                "m": "existing or occurring at or on the surface",
+                "index": 12
+            },
+            {
+                "w": "wayward",
+                "m": "difficult to control or predict because of unusual or perverse behavior",
+                "index": 13
+            },
+            {
+                "w": "volatile",
+                "m": "liable to change rapidly and unpredictably, especially for the worse",
+                "index": 14
+            },
+            {
+                "w": "vexation",
+                "m": "the state of being annoyed, frustrated, or worried",
+                "index": 16
+            },
+            {
+                "w": "abject",
+                "m": "completely without pride or dignity; self-abasing",
+                "index": 19
+            },
+            {
+                "w": "arresting",
+                "m": "attracting attention; striking",
+                "index": 20
+            },
+            {
+                "w": "allusive",
+                "m": "working by suggestion rather than explicit mention",
+                "index": 21
+            },
+            {
+                "w": "assail",
+                "m": "to make a concerted or violent attack on",
+                "index": 22
+            },
+            {
+                "w": "adept",
+                "m": "very skilled or proficient at something",
+                "index": 23
+            },
+            {
+                "w": "apprehension",
+                "m": "anxiety or fear that something bad or unpleasant will happen",
+                "index": 24
+            },
+            {
+                "w": "antagonize",
+                "m": "to cause someone to become hostile",
+                "index": 25
+            },
+            {
+                "w": "amicable",
+                "m": "having a spirit of friendliness; without serious disagreement or rancor",
+                "index": 19
+            },
+            {
+                "w": "chastise",
+                "m": "to rebuke or reprimand severely",
+                "index": 20
+            },
+            {
+                "w": "astute",
+                "m": "having or showing an ability to accurately assess situations or people and turn this to one's advantage",
+                "index": 21
+            },
+            {
+                "w": "benevolent",
+                "m": "well-meaning and kindly",
+                "index": 22
+            },
+            {
+                "w": "adverse",
+                "m": "preventing success or development; harmful; unfavorable",
+                "index": 23
+            },
+            {
+                "w": "ardent",
+                "m": "enthusiastic or passionate",
+                "index": 24
+            },
+            {
+                "w": "barren",
+                "m": "too poor to produce much or any vegetation; not producing fruit or seed",
+                "index": 25
+            },
+            {
+                "w": "animosity",
+                "m": "strong hostility or antagonism, usually arising from a deep-seated dislike or resentment",
+                "index": -1
+            },
+            {
+                "w": "commence",
+                "m": "to begin; to start",
+                "index": 21
+            },
+            {
+                "w": "berate",
+                "m": "to scold or criticize (someone) angrily",
+                "index": 22
+            },
+            {
+                "w": "appropriate",
+                "m": "suitable or proper in the circumstances",
+                "index": 23
+            },
+            {
+                "w": "axiomatic",
+                "m": "self-evident or unquestionable",
+                "index": 24
+            },
+            {
+                "w": "bombastic",
+                "m": "high-sounding but with little meaning; inflated",
+                "index": 25
+            },
+            {
+                "w": "aver",
+                "m": "to state or assert to be the case",
+                "index": 19
+            },
+            {
+                "w": "economy",
+                "m": "the state of a country or region in terms of the production and consumption of goods and services",
+                "index": 20
+            },
+            {
+                "w": "convalescent",
+                "m": "a person who is recovering after an illness or operation",
+                "index": 21
+            },
+            {
+                "w": "buoyant",
+                "m": "cheerful and optimistic",
+                "index": 22
+            },
+            {
+                "w": "archetype",
+                "m": "a very typical example of a certain person or thing",
+                "index": 23
+            },
+            {
+                "w": "cease",
+                "m": "to bring or come to an end",
+                "index": 24
+            },
+            {
+                "w": "cajole",
+                "m": "to persuade someone to do something by sustained coaxing or flattery",
+                "index": 25
+            },
+            {
+                "w": "barrage",
+                "m": "a concentrated artillery bombardment over a wide area",
+                "index": 19
+            },
+            {
+                "w": "elementary",
+                "m": "relating to the most basic or fundamental aspects of a subject",
+                "index": 20
+            },
+            {
+                "w": "curb",
+                "m": "to restrain or keep in check",
+                "index": 21
+            },
+            {
+                "w": "buttress",
+                "m": "to increase the strength of or justification for; reinforce",
+                "index": 22
+            },
+            {
+                "w": "articulate",
+                "m": "having or showing the ability to speak fluently and coherently",
+                "index": 23
+            },
+            {
+                "w": "conducive",
+                "m": "making a certain situation or outcome likely or possible",
+                "index": 24
+            },
+            {
+                "w": "chary",
+                "m": "cautiously or suspiciously reluctant to do something",
+                "index": 25
+            },
+            {
+                "w": "cathartic",
+                "m": "providing psychological relief through the open expression of strong emotions",
+                "index": 19
+            },
+            {
+                "w": "embellish",
+                "m": "to make (a statement or story) more interesting or entertaining by adding extra details, especially ones that are not true",
+                "index": 20
+            },
+            {
+                "w": "decry",
+                "m": "to publicly denounce or criticize",
+                "index": 21
+            },
+            {
+                "w": "condone",
+                "m": "to accept and allow (behavior that is considered morally wrong or offensive) to continue",
+                "index": 22
+            },
+            {
+                "w": "auspicious",
+                "m": "giving or being a sign of future success; favorable",
+                "index": 23
+            },
+            {
+                "w": "corporeal",
+                "m": "relating to a person's body, especially as opposed to their spirit",
+                "index": 24
+            },
+            {
+                "w": "curmudgeon",
+                "m": "a bad-tempered person, especially an old one",
+                "index": 25
+            },
+            {
+                "w": "decipher",
+                "m": "to convert (a text written in code, or a coded signal) into normal language; to interpret or analyze (something)",
+                "index": 19
+            },
+            {
+                "w": "euphoric",
+                "m": "characterized by or feeling intense excitement and happiness",
+                "index": 20
+            },
+            {
+                "w": "duress",
+                "m": "threats, violence, constraints, or other action used to coerce someone into doing something against their will or better judgment",
+                "index": 21
+            },
+            {
+                "w": "contravene",
+                "m": "to violate the prohibition or order of (a law, treaty, or code of conduct)",
+                "index": 22
+            },
+            {
+                "w": "bereft",
+                "m": "deprived of or lacking something, especially a nonmaterial asset",
+                "index": 23
+            },
+            {
+                "w": "doctrinaire",
+                "m": "seeking to impose a doctrine in all circumstances without regard to practical considerations",
+                "index": 24
+            },
+            {
+                "w": "dirge",
+                "m": "a mournful song, piece of music, or poem",
+                "index": 25
+            },
+            {
+                "w": "delusion",
+                "m": "a belief or impression that is firmly maintained despite being contradicted by what is generally accepted as reality",
+                "index": 19
+            },
+            {
+                "w": "exonerate",
+                "m": "to absolve (someone) from blame for a fault or wrongdoing, especially after due consideration of the case",
+                "index": 20
+            },
+            {
+                "w": "evoke",
+                "m": "to bring or recall to the conscious mind",
+                "index": 21
+            },
+            {
+                "w": "denounce",
+                "m": "to publicly declare to be wrong or evil",
+                "index": 22
+            },
+            {
+                "w": "captious",
+                "m": "tending to find fault or raise petty objections",
+                "index": 23
+            },
+            {
+                "w": "eclectic",
+                "m": "deriving ideas, style, or taste from a broad and diverse range of sources",
+                "index": 24
+            },
+            {
+                "w": "estimable",
+                "m": "worthy of great respect; admirable",
+                "index": 25
+            },
+            {
+                "w": "dispense",
+                "m": "to distribute or provide (a service or information) to a number of people",
+                "index": 19
+            },
+            {
+                "w": "extrapolate",
+                "m": "to estimate or conclude (something) by extrapolating",
+                "index": 20
+            },
+            {
+                "w": "fawn",
+                "m": "to give a servile display of exaggerated flattery or affection, typically in order to gain favor or advantage",
+                "index": 21
+            },
+            {
+                "w": "despotic",
+                "m": "of or typical of a despot; tyrannical",
+                "index": 22
+            },
+            {
+                "w": "conclusive",
+                "m": "serving to prove a case; decisive or convincing",
+                "index": 23
+            },
+            {
+                "w": "equanimity",
+                "m": "mental calmness, composure, and evenness of temper, especially in a difficult situation",
+                "index": 24
+            },
+            {
+                "w": "euphemism",
+                "m": "a mild or indirect word or expression substituted for one considered to be too harsh or blunt when referring to something unpleasant or embarrassing",
+                "index": 25
+            },
+            {
+                "w": "eloquent",
+                "m": "fluent or persuasive in speaking or writing",
+                "index": 19
+            },
+            {
+                "w": "falter",
+                "m": "to lose strength or momentum; to move hesitantly or unsteadily",
+                "index": 20
+            },
+            {
+                "w": "fret",
+                "m": "to be constantly or visibly worried or anxious",
+                "index": 21
+            },
+            {
+                "w": "deviate",
+                "m": "to depart from an established course",
+                "index": 22
+            },
+            {
+                "w": "conspire",
+                "m": "to make secret plans jointly to commit an unlawful or harmful act",
+                "index": 23
+            },
+            {
+                "w": "exorbitant",
+                "m": "unreasonably high (in price or amount)",
+                "index": 24
+            },
+            {
+                "w": "excoriate",
+                "m": "to censure or criticize severely",
+                "index": 25
+            },
+            {
+                "w": "enthrall",
+                "m": "to capture the fascinated attention of",
+                "index": 19
+            },
+            {
+                "w": "fervent",
+                "m": "having or displaying a passionate intensity",
+                "index": 20
+            },
+            {
+                "w": "glib",
+                "m": "fluent and voluble but insincere and shallow",
+                "index": 21
+            },
+            {
+                "w": "disinterested",
+                "m": "not influenced by considerations of personal advantage; impartial",
+                "index": 22
+            },
+            {
+                "w": "delineate",
+                "m": "to describe or portray (something) precisely",
+                "index": 23
+            },
+            {
+                "w": "fickle",
+                "m": "changing frequently, especially as regards one's loyalties, interests, or affection",
+                "index": 24
+            },
+            {
+                "w": "exigent",
+                "m": "pressing; demanding",
+                "index": 25
+            },
+            {
+                "w": "eradicate",
+                "m": "to destroy completely; to put an end to",
+                "index": 19
+            },
+            {
+                "w": "foment",
+                "m": "to instigate or stir up (an undesirable or violent sentiment or course of action)",
+                "index": 20
+            },
+            {
+                "w": "headstrong",
+                "m": "self-willed and obstinate; stubbornly determined to do what one wants",
+                "index": 21
+            },
+            {
+                "w": "escalate",
+                "m": "to increase rapidly",
+                "index": 22
+            },
+            {
+                "w": "disentangle",
+                "m": "to free (something or someone) from an entanglement; to untangle",
+                "index": 23
+            },
+            {
+                "w": "figurative",
+                "m": "departing from a literal use of words; metaphorical",
+                "index": 24
+            },
+            {
+                "w": "haughty",
+                "m": "arrogantly superior and disdainful",
+                "index": 25
+            },
+            {
+                "w": "fledgling",
+                "m": "a person or organization that is immature, inexperienced, or underdeveloped",
+                "index": 19
+            },
+            {
+                "w": "gaffe",
+                "m": "an unintentional act or remark causing embarrassment to its originator; a blunder",
+                "index": 20
+            },
+            {
+                "w": "intermittent",
+                "m": "occurring at irregular intervals; not continuous or steady",
+                "index": 21
+            },
+            {
+                "w": "exorcise",
+                "m": "to drive out or attempt to drive out (an evil spirit) from a person or place",
+                "index": 22
+            },
+            {
+                "w": "exhort",
+                "m": "to strongly encourage or urge (someone) to do something",
+                "index": 23
+            },
+            {
+                "w": "flustered",
+                "m": "in a state of agitated confusion",
+                "index": 24
+            },
+            {
+                "w": "heady",
+                "m": "potent; intoxicating",
+                "index": 25
+            },
+            {
+                "w": "fortitude",
+                "m": "courage in pain or adversity",
+                "index": 19
+            },
+            {
+                "w": "heterodox",
+                "m": "not conforming with accepted or orthodox standards or beliefs",
+                "index": 20
+            },
+            {
+                "w": "ire",
+                "m": "anger",
+                "index": 21
+            },
+            {
+                "w": "finicky",
+                "m": "fussy about one's needs or requirements",
+                "index": 22
+            },
+            {
+                "w": "frailty",
+                "m": "the condition of being weak and delicate",
+                "index": 23
+            },
+            {
+                "w": "gullible",
+                "m": "easily persuaded to believe something; credulous",
+                "index": 24
+            },
+            {
+                "w": "imperturbable",
+                "m": "unable to be upset or excited; calm",
+                "index": 25
+            },
+            {
+                "w": "fortuitous",
+                "m": "happening by chance or accident; occurring unexpectedly or accidentally",
+                "index": -1
+            },
+            {
+                "w": "histrionic",
+                "m": "overly theatrical or melodramatic in character or style",
+                "index": 20
+            },
+            {
+                "w": "languid",
+                "m": "displaying or having a disinclination for physical exertion or effort; slow and relaxed",
+                "index": 21
+            },
+            {
+                "w": "foil",
+                "m": "to prevent (something considered wrong or undesirable) from succeeding",
+                "index": 22
+            },
+            {
+                "w": "grievance",
+                "m": "a real or imagined wrong or other cause for complaint or protest, especially unfair treatment",
+                "index": 23
+            },
+            {
+                "w": "idiosyncratic",
+                "m": "peculiar or individual",
+                "index": 24
+            },
+            {
+                "w": "implacable",
+                "m": "relentless; unstoppable",
+                "index": 25
+            },
+            {
+                "w": "goad",
+                "m": "to provoke or annoy (someone) so as to stimulate some action or reaction",
+                "index": 19
+            },
+            {
+                "w": "implicit",
+                "m": "implied though not plainly expressed",
+                "index": 20
+            },
+            {
+                "w": "lull",
+                "m": "a temporary interval of quiet or lack of activity",
+                "index": 21
+            },
+            {
+                "w": "intertwined",
+                "m": "twisted together; connected or linked closely",
+                "index": 22
+            },
+            {
+                "w": "harangue",
+                "m": "a lengthy and aggressive speech",
+                "index": 23
+            },
+            {
+                "w": "incidental",
+                "m": "happening as a minor accompaniment to something else",
+                "index": 24
+            },
+            {
+                "w": "lambaste",
+                "m": "to criticize (someone or something) harshly",
+                "index": 25
+            },
+            {
+                "w": "imminent",
+                "m": "about to happen",
+                "index": 19
+            },
+            {
+                "w": "inviolate",
+                "m": "free or safe from injury or violation",
+                "index": 20
+            },
+            {
+                "w": "mettlesome",
+                "m": "full of spirit and courage",
+                "index": 21
+            },
+            {
+                "w": "inundate",
+                "m": "to overwhelm (someone) with things or people to be dealt with",
+                "index": 22
+            },
+            {
+                "w": "ploy",
+                "m": "a cunning plan or action designed to turn a situation to one's own advantage",
+                "index": 23
+            },
+            {
+                "w": "ingrained",
+                "m": "deeply rooted or firmly established",
+                "index": 24
+            },
+            {
+                "w": "miscreant",
+                "m": "a person who behaves badly or in a way that breaks the law",
+                "index": 25
+            },
+            {
+                "w": "incontrovertible",
+                "m": "not able to be denied or disputed",
+                "index": 19
+            },
+            {
+                "w": "liability",
+                "m": "the state of being responsible for something, especially by law",
+                "index": 20
+            },
+            {
+                "w": "mollify",
+                "m": "to appease the anger or anxiety of (someone)",
+                "index": 21
+            },
+            {
+                "w": "ironclad",
+                "m": "impenetrable to attack or compromise",
+                "index": 22
+            },
+            {
+                "w": "poise",
+                "m": "graceful and elegant bearing in a person",
+                "index": 23
+            },
+            {
+                "w": "insolent",
+                "m": "showing a rude and arrogant lack of respect",
+                "index": 24
+            },
+            {
+                "w": "peccadillo",
+                "m": "a small, relatively unimportant offense or sin",
+                "index": 25
+            },
+            {
+                "w": "itinerant",
+                "m": "traveling from place to place",
+                "index": 19
+            },
+            {
+                "w": "obstinate",
+                "m": "stubbornly refusing to change one's opinion or chosen course of action",
+                "index": 20
+            },
+            {
+                "w": "neutralize",
+                "m": "to render (something) ineffective or harmless by applying an opposite force or effect",
+                "index": 21
+            },
+            {
+                "w": "jeopardize",
+                "m": "to put (someone or something) into a situation in which there is a danger of loss, harm, or failure",
+                "index": 22
+            },
+            {
+                "w": "pomposity",
+                "m": "the quality of being pompous; self-importance",
+                "index": 23
+            },
+            {
+                "w": "lampoon",
+                "m": "to publicly criticize (someone or something) by using ridicule, irony, or sarcasm",
+                "index": 24
+            },
+            {
+                "w": "philistine",
+                "m": "a person who is hostile or indifferent to culture and the arts, or who has no understanding of them",
+                "index": 25
+            },
+            {
+                "w": "magnanimous",
+                "m": "generous or forgiving, especially towards a rival or less powerful person",
+                "index": 19
+            },
+            {
+                "w": "painstaking",
+                "m": "done with or employing great care and thoroughness",
+                "index": 20
+            },
+            {
+                "w": "nonplussed",
+                "m": "in a state of perplexity or confusion",
+                "index": 21
+            },
+            {
+                "w": "mercurial",
+                "m": "subject to sudden or unpredictable changes of mood or mind",
+                "index": 22
+            },
+            {
+                "w": "proxy",
+                "m": "the authority to represent someone else, especially in voting",
+                "index": 23
+            },
+            {
+                "w": "lavish",
+                "m": "sumptuously rich, elaborate, or luxurious",
+                "index": 24
+            },
+            {
+                "w": "meritorious",
+                "m": "deserving of praise, reward, or recognition due to one's actions or qualities",
+                "index": -1
+            },
+            {
+                "w": "phlegmatic",
+                "m": "having an unemotional and stolidly calm disposition",
+                "index": 20
+            },
+            {
+                "w": "precipitous",
+                "m": "dangerously high or steep",
+                "index": 21
+            },
+            {
+                "w": "oblivious",
+                "m": "not aware of or not concerned about what is happening around one",
+                "index": 22
+            },
+            {
+                "w": "relent",
+                "m": "to abandon or mitigate a harsh intention or cruel treatment",
+                "index": 23
+            },
+            {
+                "w": "lugubrious",
+                "m": "looking or sounding sad and dismal",
+                "index": 24
+            },
+            {
+                "w": "repugnant",
+                "m": "extremely distasteful; unacceptable",
+                "index": 25
+            },
+            {
+                "w": "mutiny",
+                "m": "a revolt or rebellion against authority, typically by a group of individuals, such as sailors or soldiers, against their superiors",
+                "index": -1
+            },
+            {
+                "w": "pretentious",
+                "m": "attempting to impress by affecting greater importance, talent, culture, etc., than is actually possessed",
+                "index": 21
+            },
+            {
+                "w": "perpetrate",
+                "m": "to carry out or commit (a harmful, illegal, or immoral action)",
+                "index": 22
+            },
+            {
+                "w": "macabre",
+                "m": "disturbing and horrifying because of involvement with or depiction of death and injury",
+                "index": 24
+            },
+            {
+                "w": "sentimental",
+                "m": "of or prompted by feelings of tenderness, sadness, or nostalgia",
+                "index": 25
+            },
+            {
+                "w": "paradoxical",
+                "m": "seemingly absurd or self-contradictory",
+                "index": 19
+            },
+            {
+                "w": "propensity",
+                "m": "an inclination or natural tendency to behave in a particular way",
+                "index": 20
+            },
+            {
+                "w": "plaintive",
+                "m": "sounding sad and mournful",
+                "index": 22
+            },
+            {
+                "w": "rigor",
+                "m": "strictness or severity, especially in the imposition of hardship or difficulty",
+                "index": 23
+            },
+            {
+                "w": "morose",
+                "m": "sullen and ill-tempered",
+                "index": 24
+            },
+            {
+                "w": "squander",
+                "m": "to waste (something, especially money or time) in a reckless and foolish manner",
+                "index": 25
+            },
+            {
+                "w": "perseverance",
+                "m": "steadfastness in doing something despite difficulty or delay in achieving success",
+                "index": 19
+            },
+            {
+                "w": "qualm",
+                "m": "an uneasy feeling of doubt, worry, or fear, especially about one's own conduct; a misgiving",
+                "index": 20
+            },
+            {
+                "w": "propagate",
+                "m": "to spread and promote (an idea, theory, etc.) widely",
+                "index": 21
+            },
+            {
+                "w": "poignant",
+                "m": "evoking a keen sense of sadness or regret",
+                "index": 22
+            },
+            {
+                "w": "sparse",
+                "m": "thinly dispersed or scattered; not dense",
+                "index": 23
+            },
+            {
+                "w": "officious",
+                "m": "assertive of authority in an annoyingly domineering way, especially with regard to petty or trivial matters",
+                "index": 24
+            },
+            {
+                "w": "swindle",
+                "m": "to use deception to deprive (someone) of money or possessions",
+                "index": 25
+            },
+            {
+                "w": "render",
+                "m": "to provide or give (a service, help, etc.)",
+                "index": 19
+            },
+            {
+                "w": "renege",
+                "m": "to go back on a promise, undertaking, or contract",
+                "index": 20
+            },
+            {
+                "w": "recourse",
+                "m": "a source of help in a difficult situation",
+                "index": 21
+            },
+            {
+                "w": "quiescent",
+                "m": "in a state or period of inactivity or dormancy",
+                "index": 22
+            },
+            {
+                "w": "steadfast",
+                "m": "resolutely or dutifully firm and unwavering",
+                "index": 23
+            },
+            {
+                "w": "ramification",
+                "m": "a complex or unwelcome consequence of an action or event",
+                "index": 24
+            },
+            {
+                "w": "tangible",
+                "m": "perceptible by touch; clear and definite; real",
+                "index": 25
+            },
+            {
+                "w": "repertoire",
+                "m": "a stock of plays, dances, or pieces that a company or a performer knows or is prepared to perform",
+                "index": 19
+            },
+            {
+                "w": "stinting",
+                "m": "providing or allowing or yielding scanty amounts",
+                "index": 20
+            },
+            {
+                "w": "reiterate",
+                "m": "to say something again or a number of times, typically for emphasis or clarity",
+                "index": 22
+            },
+            {
+                "w": "suspect",
+                "m": "to have an idea or impression of the existence, presence, or truth of (something) without certain proof",
+                "index": 23
+            },
+            {
+                "w": "serene",
+                "m": "calm, peaceful, and untroubled; tranquil",
+                "index": 24
+            },
+            {
+                "w": "turpitude",
+                "m": "depravity; wickedness",
+                "index": 25
+            },
+            {
+                "w": "resilient",
+                "m": "able to withstand or recover quickly from difficult conditions",
+                "index": 19
+            },
+            {
+                "w": "temper",
+                "m": "to improve the hardness and elasticity of (steel or other metal) by reheating and then cooling it",
+                "index": 20
+            },
+            {
+                "w": "regress",
+                "m": "to return to a former or less developed state",
+                "index": 21
+            },
+            {
+                "w": "subside",
+                "m": "to become less intense, violent, or severe",
+                "index": 22
+            },
+            {
+                "w": "tedious",
+                "m": "too long, slow, or dull; tiresome or monotonous",
+                "index": 23
+            },
+            {
+                "w": "unalloyed",
+                "m": "not mixed or adulterated with any other substance; pure",
+                "index": 25
+            },
+            {
+                "w": "resolute",
+                "m": "admirably purposeful, determined, and unwavering",
+                "index": 19
+            },
+            {
+                "w": "tentative",
+                "m": "not certain or fixed; provisional",
+                "index": 20
+            },
+            {
+                "w": "repercussion",
+                "m": "an unintended consequence of an event or action, especially an unwelcome one",
+                "index": 21
+            },
+            {
+                "w": "subsume",
+                "m": "to include or absorb (something) in something else",
+                "index": 22
+            },
+            {
+                "w": "vitality",
+                "m": "the state of being strong and active; energy",
+                "index": 23
+            },
+            {
+                "w": "tacit",
+                "m": "understood or implied without being stated openly",
+                "index": 24
+            },
+            {
+                "w": "undercut",
+                "m": "to undermine or destroy the force, value, or effectiveness of",
+                "index": 25
+            },
+            {
+                "w": "supple",
+                "m": "bending and moving easily and gracefully; flexible",
+                "index": 19
+            },
+            {
+                "w": "unprecedented",
+                "m": "never done or known before",
+                "index": 20
+            },
+            {
+                "w": "replenish",
+                "m": "to fill (something) up again",
+                "index": 21
+            },
+            {
+                "w": "surmount",
+                "m": "to overcome (a difficulty or obstacle)",
+                "index": 22
+            },
+            {
+                "w": "whimsical",
+                "m": "playfully quaint or fanciful, especially in an appealing and amusing way",
+                "index": 23
+            },
+            {
+                "w": "transcend",
+                "m": "to be or go beyond the range or limits of (something abstract, typically a conceptual field or division)",
+                "index": 24
+            },
+            {
+                "w": "wheedle",
+                "m": "to employ endearments or flattery to persuade someone to do something or give one something",
+                "index": 25
+            },
+            {
+                "w": "valor",
+                "m": "great courage in the face of danger, especially in battle",
+                "index": 19
+            },
+            {
+                "w": "vivacious",
+                "m": "attractively lively and animated",
+                "index": 20
+            },
+            {
+                "w": "vigilant",
+                "m": "keeping careful watch for possible danger or difficulties",
+                "index": 21
+            },
+            {
+                "w": "tangential",
+                "m": "barely touching a subject, not closely connected, divergent",
+                "index": 22
+            },
+            {
+                "w": "yield",
+                "m": "to produce or provide (a natural, agricultural, or industrial product)",
+                "index": 23
+            },
+            {
+                "w": "treatise",
+                "m": "a written work dealing formally and systematically with a subject",
+                "index": 24
+            },
+            {
+                "w": "xenophobic",
+                "m": "having or showing a dislike or fear of people from other countries",
+                "index": 25
+            },
+            {
+                "w": "abrogate",
+                "m": "to repeal or do away with (a law, right, or formal agreement)",
+                "index": 28
+            },
+            {
+                "w": "abstruse",
+                "m": "difficult to understand; obscure",
+                "index": 29
+            },
+            {
+                "w": "aghast",
+                "m": "filled with horror or shock",
+                "index": 28
+            },
+            {
+                "w": "auxiliary",
+                "m": "providing supplementary or additional help and support",
+                "index": 29
+            },
+            {
+                "w": "apprise",
+                "m": "to inform or tell (someone)",
+                "index": 28
+            },
+            {
+                "w": "caricature",
+                "m": "a picture, description, or imitation of a person or thing in which certain striking characteristics are exaggerated to create a comic or grotesque effect",
+                "index": 29
+            },
+            {
+                "w": "beguile",
+                "m": "to charm or enchant (someone), sometimes in a deceptive way",
+                "index": 28
+            },
+            {
+                "w": "depravity",
+                "m": "moral corruption; wickedness",
+                "index": 29
+            },
+            {
+                "w": "boon",
+                "m": "a thing that is helpful or beneficial",
+                "index": 28
+            },
+            {
+                "w": "dilettante",
+                "m": "a person who cultivates an area of interest without real commitment or knowledge",
+                "index": 29
+            },
+            {
+                "w": "callous",
+                "m": "emotionally insensitive; showing cruel disregard for others",
+                "index": 28
+            },
+            {
+                "w": "effrontery",
+                "m": "insolent or impertinent behavior; audacity",
+                "index": 29
+            },
+            {
+                "w": "coddle",
+                "m": "to treat in an indulgent or overprotective way",
+                "index": 28
+            },
+            {
+                "w": "encroach",
+                "m": "to intrude on (a person's territory, rights, personal life, etc.)",
+                "index": 29
+            },
+            {
+                "w": "crescendo",
+                "m": "a gradual increase in loudness or intensity, especially in music",
+                "index": 28
+            },
+            {
+                "w": "endow",
+                "m": "to provide with a quality, ability, or asset",
+                "index": 29
+            },
+            {
+                "w": "extenuating",
+                "m": "making (guilt or an offense) seem less serious or more forgivable",
+                "index": 28
+            },
+            {
+                "w": "entreat",
+                "m": "to ask someone earnestly or anxiously to do something",
+                "index": 29
+            },
+            {
+                "w": "frenetic",
+                "m": "fast and energetic in a rather wild and uncontrolled way",
+                "index": 28
+            },
+            {
+                "w": "gregarious",
+                "m": "fond of company; sociable",
+                "index": 29
+            },
+            {
+                "w": "fringe",
+                "m": "the unconventional, extreme, or marginal wing of a group or sphere of activity",
+                "index": 28
+            },
+            {
+                "w": "indictment",
+                "m": "a formal charge or accusation of a serious crime",
+                "index": 29
+            },
+            {
+                "w": "hapless",
+                "m": "unfortunate, unlucky",
+                "index": 28
+            },
+            {
+                "w": "indignant",
+                "m": "feeling or showing anger or annoyance at what is perceived as unfair treatment",
+                "index": 29
+            },
+            {
+                "w": "immaculate",
+                "m": "perfectly clean, neat, or tidy; free from flaws or mistakes",
+                "index": 28
+            },
+            {
+                "w": "ineluctable",
+                "m": "unable to be resisted or avoided; inescapable",
+                "index": 29
+            },
+            {
+                "w": "obfuscate",
+                "m": "to render obscure, unclear, or unintelligible",
+                "index": 28
+            },
+            {
+                "w": "inquisitive",
+                "m": "curious or inquiring",
+                "index": 29
+            },
+            {
+                "w": "ossify",
+                "m": "to cease developing; be stagnant or rigid",
+                "index": 28
+            },
+            {
+                "w": "latitude",
+                "m": "scope for freedom of action or thought",
+                "index": 29
+            },
+            {
+                "w": "pastiche",
+                "m": "an artistic work that imitates the style of another work, artist, or period",
+                "index": 28
+            },
+            {
+                "w": "levity",
+                "m": "humor or frivolity, especially the treatment of a serious matter with humor or in a manner lacking due respect",
+                "index": 29
+            },
+            {
+                "w": "perspicacious",
+                "m": "having a ready insight into and understanding of things",
+                "index": 28
+            },
+            {
+                "w": "malevolent",
+                "m": "having or showing a wish to do evil to others",
+                "index": 29
+            },
+            {
+                "w": "ponderous",
+                "m": "slow and clumsy because of great weight",
+                "index": 28
+            },
+            {
+                "w": "mediate",
+                "m": "to intervene in a dispute to bring about an agreement or reconciliation",
+                "index": 29
+            },
+            {
+                "w": "recluse",
+                "m": "a person who lives a solitary life and tends to avoid other people",
+                "index": 28
+            },
+            {
+                "w": "occlude",
+                "m": "to stop, close up, or obstruct (an opening, orifice, or passage)",
+                "index": 29
+            },
+            {
+                "w": "retaliate",
+                "m": "to make an attack or assault in return for a similar attack",
+                "index": 28
+            },
+            {
+                "w": "pacify",
+                "m": "to quell the anger, agitation, or excitement of",
+                "index": 29
+            },
+            {
+                "w": "rhapsody",
+                "m": "an effusively enthusiastic or ecstatic expression of feeling",
+                "index": 28
+            },
+            {
+                "w": "paragon",
+                "m": "a person or thing regarded as a perfect example of a particular quality",
+                "index": 29
+            },
+            {
+                "w": "serendipitous",
+                "m": "occurring or discovered by chance in a happy or beneficial way",
+                "index": 28
+            },
+            {
+                "w": "patronize",
+                "m": "to treat with an apparent kindness that betrays a feeling of superiority",
+                "index": 29
+            },
+            {
+                "w": "shirk",
+                "m": "to avoid or neglect (a duty or responsibility)",
+                "index": 28
+            },
+            {
+                "w": "penurious",
+                "m": "extremely poor; poverty-stricken",
+                "index": 29
+            },
+            {
+                "w": "sinecure",
+                "m": "a position requiring little or no work but giving the holder status or financial benefit",
+                "index": 28
+            },
+            {
+                "w": "piquant",
+                "m": "having a sharply strong taste or smell",
+                "index": 29
+            },
+            {
+                "w": "sinuous",
+                "m": "having many curves and turns",
+                "index": 28
+            },
+            {
+                "w": "rampant",
+                "m": "spreading unchecked and causing harm",
+                "index": 29
+            },
+            {
+                "w": "sordid",
+                "m": "involving ignoble actions and motives; arousing moral distaste and contempt",
+                "index": 28
+            },
+            {
+                "w": "remote",
+                "m": "far away from other places, buildings, or people; situated far from the main centers of population",
+                "index": 29
+            },
+            {
+                "w": "stanch",
+                "m": "to stop or restrict (a flow of blood) from a wound",
+                "index": 28
+            },
+            {
+                "w": "reprobate",
+                "m": "an unprincipled or wicked person; a rogue",
+                "index": 29
+            },
+            {
+                "w": "surfeit",
+                "m": "an excessive amount of something",
+                "index": 28
+            },
+            {
+                "w": "turbid",
+                "m": "cloudy, opaque, or thick with suspended matter",
+                "index": 29
+            },
+            {
+                "w": "ulterior",
+                "m": "existing beyond what is obvious or admitted; intentionally hidden",
+                "index": 28
+            },
+            {
+                "w": "turgid",
+                "m": "swollen and distended or congested",
+                "index": 29
+            },
+            {
+                "w": "voluble",
+                "m": "speaking or spoken incessantly and fluently",
+                "index": 28
+            },
+            {
+                "w": "vacuous",
+                "m": "having or showing a lack of thought or intelligence; mindless",
+                "index": 29
+            }
+        ]
+        
+        let currentWordIndex = 0;
+        let score = 0;
+
+        function generateRandomOptions(correctIndex) {
+            const options = [correctIndex];
+            while (options.length < 4) {
+                const randomIndex = Math.floor(Math.random() * wordsData.length);
+                if (!options.includes(randomIndex)) {
+                    options.push(randomIndex);
+                }
+            }
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function showQuestion() {
+            if (currentWordIndex >= wordsData.length) {
+                // All questions are answered, show the final score or any other message.
+                document.getElementById('word').textContent = 'Quiz Complete';
+                document.getElementById('options').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'none';
+                return;
+            }
+
+            const word = wordsData[currentWordIndex].w;
+            const meaning = wordsData[currentWordIndex].m;
+            const options = generateRandomOptions(currentWordIndex);
+
+            document.getElementById('word').textContent = word;
+            document.getElementById('options').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            for (let i = 0; i < 4; i++) {
+                document.getElementsByClassName('option')[i].textContent = wordsData[options[i]].m;
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            const id = "option" + selectedIndex;
+            const value = document.getElementById(id).innerText;
+            const actVal = wordsData[currentWordIndex].m;
+            if (value === actVal) {
+                score++;
+                document.getElementById(id).classList.add('correct');
+            } else {
+                document.getElementsByClassName('option')[selectedIndex].classList.add('selected');
+            }
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            for (let i = 0; i < 4; i++) {
+                document.getElementById('option' + i).classList.remove('correct');
+                document.getElementById('option' + i).classList.remove('selected');
+            }
+            currentWordIndex++;
+            showQuestion();
+        }
+        function processGroup() {
+            const input = prompt("Enter the group in csv:");
+            if (input !== null && input !== "") {
+                const numbersArray = input.split(",");
+                const parsedNumbersArray = numbersArray.map(number => parseInt(number.trim(), 10));
+                wordsData = wordsData.filter(w => parsedNumbersArray.indexOf(w.index) != -1);
+                wordsData = shuffle(wordsData);
+            } else {
+                alert("No input provided.");
+            }
+        }
+
+        // start the quiz when the page is loaded
+        window.addEventListener('load', () => {
+            processGroup();
+            showQuestion();
+        });
+        function speakPronunciation() {
+            var word = document.getElementById("word").innerText;
+            // Check if the Web Speech API is available in the browser
+            if ('speechSynthesis' in window) {
+                var speechSynthesis = window.speechSynthesis;
+                var speechUtterance = new SpeechSynthesisUtterance(word);
+                speechSynthesis.speak(speechUtterance);
+            } else {
+                alert("Sorry, your browser doesn't support the Web Speech API.");
+            }
+        }
+    </script>
+</body>
+
+</html>
