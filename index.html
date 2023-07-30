@@ -4116,7 +4116,7 @@
 
         let currentWordIndex = 0;
         let score = 0;
-
+        let options = [];
         function generateRandomOptions(correctIndex) {
             const options = [correctIndex];
             while (options.length < 4) {
@@ -4139,14 +4139,14 @@
 
             const word = wordsData[currentWordIndex].w;
             const meaning = wordsData[currentWordIndex].m;
-            const options = generateRandomOptions(currentWordIndex);
+            options = generateRandomOptions(currentWordIndex);
 
             document.getElementById('word').textContent = word;
             document.getElementById('options').style.display = 'block';
             document.getElementById('next-btn').style.display = 'none';
 
             for (let i = 0; i < 4; i++) {
-                document.getElementsByClassName('option')[i].textContent = wordsData[options[i]].m;
+                document.getElementById('option' + i).textContent = wordsData[options[i]].m;
             }
         }
 
@@ -4158,7 +4158,10 @@
                 score++;
                 document.getElementById(id).classList.add('correct');
             } else {
-                document.getElementsByClassName('option')[selectedIndex].classList.add('selected');
+                document.getElementById(id).classList.add('selected');
+            }
+            for (let i = 0; i < 4; i++) {
+                document.getElementById('option' + i).innerHTML = `${wordsData[options[i]].m}<span style='color:red;'> - <b>${wordsData[options[i]].w}</b></span>`;
             }
             document.getElementById('next-btn').style.display = 'block';
         }
@@ -4172,14 +4175,22 @@
             showQuestion();
         }
         function processGroup() {
-            const input = prompt("Enter the group in csv:");
-            if (input !== null && input !== "") {
-                const numbersArray = input.split(",");
-                const parsedNumbersArray = numbersArray.map(number => parseInt(number.trim(), 10));
-                wordsData = wordsData.filter(w => parsedNumbersArray.indexOf(w.index) != -1);
+            const input = prompt("Enter the word group (e.g: 1 or 1,2):");
+            try {
+                if (input !== null && input !== "") {
+                    const numbersArray = input.split(",");
+                    let parsedNumbersArray = numbersArray.map(number => parseInt(number.trim(), 10));
+                    parsedNumbersArray = parsedNumbersArray.filter(n => n);
+                    if (parsedNumbersArray.length == 0) throw new Error('invalid input');
+                    wordsData = wordsData.filter(w => parsedNumbersArray.indexOf(w.index) != -1);
+                    wordsData = shuffle(wordsData);
+                } else {
+                    wordsData = wordsData.filter(w => w.index == 0);
+                    wordsData = shuffle(wordsData);
+                }
+            } catch (err) {
+                wordsData = wordsData.filter(w => w.index == 0);
                 wordsData = shuffle(wordsData);
-            } else {
-                alert("No input provided.");
             }
         }
 
