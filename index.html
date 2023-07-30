@@ -86,7 +86,8 @@
 <body>
     <div class="quiz-container">
         <h1 id="word"></h1>
-        <button style="font-size: 60px; text-align: center;" onclick="speakPronunciation()"><i
+        <button style="font-size: 60px; text-align: center;"
+            onclick="speakPronunciation(document.getElementById('word').innerText)"><i
                 class="fas fa-volume-up"></i></button>
         <div id="options">
             <button id="option0" class="option" onclick="checkAnswer(0)"></button><br />
@@ -4152,6 +4153,8 @@
 
         function checkAnswer(selectedIndex) {
             const id = "option" + selectedIndex;
+            const classList = document.getElementById(id).classList;
+            if (classList.contains('correct')) return;
             const value = document.getElementById(id).innerText;
             const actVal = wordsData[currentWordIndex].m;
             if (value === actVal) {
@@ -4161,7 +4164,7 @@
                 document.getElementById(id).classList.add('selected');
             }
             for (let i = 0; i < 4; i++) {
-                document.getElementById('option' + i).innerHTML = `${wordsData[options[i]].m}<span style='color:red;'> - <b>${wordsData[options[i]].w}</b></span>`;
+                document.getElementById('option' + i).innerHTML = `${wordsData[options[i]].m}<span style='color:red;'> - <b>${wordsData[options[i]].w}</b><button style='font-size: 25px; text-align: center; margin-left:15px;' onclick='speakPronunciation("${wordsData[options[i]].w}")'><i class='fas fa-volume-up'></i></button></span>`;
             }
             document.getElementById('next-btn').style.display = 'block';
         }
@@ -4199,8 +4202,8 @@
             processGroup();
             showQuestion();
         });
-        function speakPronunciation() {
-            var word = document.getElementById("word").innerText;
+        function speakPronunciation(word) {
+            //var word = document.getElementById("word").innerText;
             // Check if the Web Speech API is available in the browser
             if ('speechSynthesis' in window) {
                 var speechSynthesis = window.speechSynthesis;
