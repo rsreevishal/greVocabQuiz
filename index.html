@@ -26,7 +26,7 @@
         }
 
         #word {
-            font-size: 54px;
+            font-size: 74px;
             text-align: center;
             margin: 20px 0;
             border: 2px solid #4caf50;
@@ -44,7 +44,7 @@
 
         /* Styling for each option button */
         .option {
-            font-size: 18px;
+            font-size: 26px;
             margin: 5px 0;
             padding: 8px;
             width: 100%;
@@ -64,7 +64,7 @@
             display: none;
             margin-top: 20px;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 40px;
             background-color: #4caf50;
             color: #fff;
             border: none;
@@ -75,13 +75,19 @@
         #next-btn:hover {
             background-color: #45a049;
         }
+
+        .quiz-container {
+            text-align: center;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body>
     <div class="quiz-container">
-        <h1 id="word"></h1><button onclick="speakPronunciation()"><i class="fas fa-volume-up"></i></button>
+        <h1 id="word"></h1>
+        <button style="font-size: 60px; text-align: center;" onclick="speakPronunciation()"><i
+                class="fas fa-volume-up"></i></button>
         <div id="options">
             <button id="option0" class="option" onclick="checkAnswer(0)"></button><br />
             <button id="option1" class="option" onclick="checkAnswer(1)"></button><br />
@@ -4107,7 +4113,7 @@
                 "index": 29
             }
         ]
-        
+
         let currentWordIndex = 0;
         let score = 0;
 
